@@ -19,7 +19,7 @@ class UserController extends BaseController {
 		
 		return Response::json(array('status' => 'failure', 'message' => 'You can not Hit Us Directly'));
 	}
-	
+	    
 	public function postCreate()
 	{
 		$postdata=file_get_contents("php://input");
