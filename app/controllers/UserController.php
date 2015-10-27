@@ -19,13 +19,13 @@ class UserController extends BaseController {
 		
 		return Response::json(array('status' => 'failure', 'message' => 'You can not Hit Us Directly'));
 	}
-	    
+	
 	public function postCreate()
 	{
 		$postdata=file_get_contents("php://input");
 		if(!empty($postdata))
 		{
-			$userId=Input::get('userId');
+			
 			$userName=Input::get('userName');
 			$userEmail=Input::get('userEmail');
 			$userMobile=Input::get('userMobile');
@@ -39,14 +39,16 @@ class UserController extends BaseController {
 			$currentUserIdPk=Input::get('currentUserIdPk');
 			$parentId=Input::get('parentId');
 			$parentIdPk=Input::get('parentIdPk');
-			$userId=Input::get('userId');
-			$userKey=Input::get('userKey');
+			$lockbalance=Input::get('lock_balance');
+			$mainbalance=Input::get('main_balance');
+			$usercount=Input::get('user_count');
 			$userStatus=Input::get('userStatus');
 			$products=Input::get('products');
 			$createdat=Commonmodel::dateandtime();
 			$clientIp=Input::get('clientIp');
+		
 			
-			if($userId!=""&&$userEmail!=""&&$userMobile!=""&&$userAddress1!=""&&$userAddress2!=""&&$userCity!=""&&$userState!=""&&$userPincode!=""&&$userType!=""&&$currentUserId!=""&&$currentUserIdPk!=""&&$userId!=""&&$parentIdPk!=""&&$userKey!=""&&$userStatus!=""&&$products!=""&&$userName!='')
+			if($userEmail!=""&&$userMobile!=""&&$userAddress1!=""&&$userAddress2!=""&&$userCity!=""&&$userState!=""&&$userPincode!=""&&$userType!=""&&$currentUserId!=""&&$currentUserIdPk!=""&&$parentIdPk!=""&&$userStatus!=""&&$products!=""&&$userName!='')
 			{
 				if(!empty($products))
 				{
@@ -57,13 +59,6 @@ class UserController extends BaseController {
 					}
 					else
 					{
-						$useridcheck=User::where('UD_USER_ID',$userId)->get();
-						if(count($useridcheck)>0)
-						{
-							return Response::json(array('status' => 'failure', 'message' => 'User ID Already Exist'));
-						}
-						else
-						{
 							$mobilenumcheck=User::where('UD_USER_MOBILE',$userMobile)->get();
 							if(count($mobilenumcheck)>0)
 							{
@@ -71,64 +66,145 @@ class UserController extends BaseController {
 							}
 							else
 							{
-								$input=array
-								(
-							
-									'UD_USER_ID'=>Input::get('userId'),
-									'UD_USER_KEY'=>md5(Input::get('userKey')),
-									'UD_USER_NAME'=>Input::get('userName'),
-									'UD_PARENT_ID'=>Input::get('parentIdPk'),
-									'UD_USER_TYPE'=>Input::get('userType'),
-									'UD_USER_EMAIL'=>Input::get('userEmail'),
-									'UD_USER_MOBILE'=>Input::get('userMobile'),
-									'UD_USER_ADDRESS1'=>Input::get('userAddress1'),
-									'UD_USER_ADDRESS2'=>Input::get('userAddress2'),
-									'UD_USER_CITY'=>Input::get('userCity'),
-									'UD_USER_STATE'=>Input::get('userState'),
-									'UD_USER_PINCODE'=>Input::get('userPincode'),
-									'UD_USER_STATUS'=>Input::get('userStatus'),
-									'UD_CREATED_AT'=>$createdat,
-									'UD_CREATED_BY'=>Input::get('currentUserId'),
-								);
-								
-								$userid=DB::table('adt_user_details')->insertGetId($input);
-								$len=count($products);
-								
-								for($j=0; $j<$len; $j++)
+								if(empty($lockbalance))
 								{
-									
-									$productinput=array
-									(
-										'upa_prod_code'=>$products[$j]['prodCode'],
-										'upa_ud_user_id'=>Input::get('userId'),
-										'upa_access_status'=>$products[$j]['prodStatus'],
-										'upa_created_at'=>$createdat,
-										'upa_created_by'=>$currentUserId,
-									);
-									$newproduct= new Userproductaccess;
-									$newproduct->create($productinput);
+									$lockbalance=0;
+								}
+								
+								if(empty($mainbalance))
+								{
+									$mainbalance=0;
 								}
 								
 								
-								$userfinance=array
-								(
-							
-									'ufin_user_id_pk_fk'=>$userid,
-									'ufin_user_id'=>Input::get('userId'),
-									'ufin_main_balance'=>0,
-									'ufin_comm_earned'=>0,
-									'ufin_total_credited'=>0,
-									'ufin_total_used'=>0,
-									'ufin_total_comm'=>0,
-									'ufin_fee_perc'=>0,
-									
-								);
 								
-								$objfinance= new Userfinance;
-								$objfinance->create($userfinance);
-								return Response::json(array('status' => 'success', 'message' => 'User have Been Created Successfully'));
+							 
+								$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->get());
+								$currentcountcheck=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
+								if($usercountdetails>=$currentcountcheck)
+								{
+									return Response::json(array('status' => 'failure', 'message' => 'You Reached Limit for creating Sub Role'));
+								}
+								else
+								{
+									
+									if(empty($usercount))
+									{
+										
+										if($userType=='SAS')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','SA')->pluck('user_reg_count');
+										}
+										elseif($userType=='SP')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','SD')->pluck('user_reg_count');
+										}
+										elseif($userType=='SPS')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','SP')->pluck('user_reg_count');
+										}
+										elseif($userType=='SD')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','D')->pluck('user_reg_count');
+										}
+										elseif($userType=='SDS')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','SD')->pluck('user_reg_count');
+										}
+										elseif($userType=='D')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','FR')->pluck('user_reg_count');
+										}
+										elseif($userType=='DS')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','D')->pluck('user_reg_count');
+										}
+										elseif($userType=='FR')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','SFR')->pluck('user_reg_count');
+										}
+										elseif($userType=='FRS')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','FR')->pluck('user_reg_count');
+										}
+										elseif($userType=='SFR')
+										{
+											$usercount=Balancedetection::where('bal_usr_roll','=','SFRS')->pluck('user_reg_count');
+										}
+										else 
+										{
+										
+										}
+										
+									}
+									
+									$useridgen=$userType.$userName;
+									$userkey=md5($userType.$userName.str_random(2));
+									$input=array
+									(
+								
+										'UD_USER_ID'=>$useridgen,
+										'UD_USER_KEY'=>$userkey,
+										'UD_USER_NAME'=>Input::get('userName'),
+										'UD_PARENT_ID'=>Input::get('parentIdPk'),
+										'UD_USER_TYPE'=>Input::get('userType'),
+										'UD_USER_EMAIL'=>Input::get('userEmail'),
+										'UD_USER_MOBILE'=>Input::get('userMobile'),
+										'UD_USER_ADDRESS1'=>Input::get('userAddress1'),
+										'UD_USER_ADDRESS2'=>Input::get('userAddress2'),
+										'UD_USER_CITY'=>Input::get('userCity'),
+										'UD_USER_STATE'=>Input::get('userState'),
+										'UD_USER_PINCODE'=>Input::get('userPincode'),
+										'UD_USER_STATUS'=>Input::get('userStatus'),
+										'UD_CREATED_AT'=>$createdat,
+										'UD_CREATED_BY'=>Input::get('currentUserId'),
+										'UD_USER_LINK'=>Input::get('UD_USER_LINK'),
+										'UD_USER_CREATE_COUNT'=>$usercount,
+											
+									);
+									
+									$userid=DB::table('adt_user_details')->insertGetId($input);
+									$len=count($products);
+									
+									for($j=0; $j<$len; $j++)
+									{
+										
+										$productinput=array
+										(
+											'upa_prod_code'=>$products[$j]['prodCode'],
+											'upa_ud_user_id'=>$useridgen,
+											'upa_access_status'=>$products[$j]['prodStatus'],
+											'upa_created_at'=>$createdat,
+											'upa_created_by'=>$currentUserId,
+										);
+										$newproduct= new Userproductaccess;
+										$newproduct->create($productinput);
+									}
+									
+									
+									$userfinance=array
+									(
+								
+										'ufin_user_id_pk_fk'=>$userid,
+										'ufin_user_id'=>$useridgen,
+										'ufin_main_balance'=>$mainbalance,
+										'ufin_comm_earned'=>0,
+										'ufin_total_credited'=>0,
+										'ufin_total_used'=>0,
+										'ufin_total_comm'=>0,
+										'ufin_fee_perc'=>0,
+										'ufin_lock_balance'=>$lockbalance,
+										
+									);
+									
+									
+									
+									$objfinance= new Userfinance;
+									$objfinance->create($userfinance);
+									return Response::json(array('status' => 'success', 'message' => 'User have Been Created Successfully'));
+								}
 							}
-						}
+						
 					}
 					
 				}
