@@ -153,6 +153,7 @@ class UserController extends BaseController {
 												
 												$useridgen=$userType.$userName;
 												$userkey=md5($userType.$userName.str_random(2));
+												$userkeysend=$userType.$userName.str_random(2);
 												$input=array
 												(
 											
@@ -221,7 +222,12 @@ class UserController extends BaseController {
 												);
 												
 												Userfinance::where('ufin_user_id',$parentId)->update($balanceupdate);
+												Mail::send('users.mails.welcome', array('userid'=>$useridgen,'password'=>$userkeysend), function($message)
+												{
+													$message->to(Input::get('userEmail'), Input::get('userName'))->subject('Reg: User ID and Password For you AppanDUkan Account');
+												});
 												return Response::json(array('status' => 'success', 'message' => 'User have Been Created Successfully'));
+												
 											}
 										}
 									
@@ -244,6 +250,28 @@ class UserController extends BaseController {
 			
 		}
 			
+	}
+	
+	
+	public function postForgetpass()
+	{
+		$postdata=file_get_contents("php://input");
+		if(!empty($postdata))
+		{
+			$email=Input::get('email');
+			if($email)
+			{
+			User::where('UD_USER_EMAIL','=',$email)->get();
+			}
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'Email Field is Manditory'));
+			}
+		}
+		else 
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'There no inout to Access'));
+		}
 	}
 	
 	
