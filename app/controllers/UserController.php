@@ -92,8 +92,34 @@ class UserController extends BaseController {
 										}
 										else
 										{
-											$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->get());
-											$currentcountcheck=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
+											if($userType!='SP')
+											{
+												$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->get());
+												$currentcountcheck=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
+											}
+											else
+											{
+												$getusercount=Balancedetection::where('bal_usr_roll','=','SP')->pluck('user_reg_count');
+												$checkstatedetailsf=count(User::where('UD_USER_TYPE','=',$userType)->where('UD_USER_STATE','=',$userState)->get());
+												$stateusercountdetails=count(State::where('adt_state_name','=',$userState)->get());
+												if(count($checkstatedetailsf)>$getusercount)
+												{
+													$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->where('UD_USER_STATE','=',$userState)->get());
+													$currentcountcheck=State::where('adt_state_name','=',$userState)->pluck('adt_state_count');
+													$statpatuserid=State::where('adt_state_name','=',$userState)->pluck('adt_state_code');
+												}
+												elseif(count($checkstatedetailsf)<=$getusercount)
+												{
+													$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->where('UD_USER_STATE','=',$userState)->get());
+													$currentcountcheck=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
+													$statpatuserid=State::where('adt_state_name','=',$userState)->pluck('adt_state_code');
+												}
+												else 
+												{
+													return Response::json(array('status' => 'failure', 'message' => 'You Exceed gthe limit for creating State Partner'));
+												}
+											}
+											
 											if($usercountdetails>=$currentcountcheck)
 											{
 												return Response::json(array('status' => 'failure', 'message' => 'You Reached Limit for creating Sub Role'));
@@ -151,13 +177,12 @@ class UserController extends BaseController {
 													
 												}
 												
-												$useridgen=$userType.$userName;
 												$userkey=md5($userType.$userName.str_random(2));
 												$userkeysend=$userType.$userName.str_random(2);
 												$input=array
 												(
 											
-													'UD_USER_ID'=>$useridgen,
+													'UD_USER_ID'=>0,
 													'UD_USER_KEY'=>$userkey,
 													'UD_USER_NAME'=>Input::get('userName'),
 													'UD_PARENT_ID'=>Input::get('parentIdPk'),
@@ -178,6 +203,22 @@ class UserController extends BaseController {
 												);
 												
 												$userid=DB::table('adt_user_details')->insertGetId($input);
+												
+												if($userType!='SP')
+												{
+													$useridgen=$userType.$userid;
+												}
+												else
+												{
+													$useridgen=$statpatuserid.$userid;
+												}
+												
+												$useridupdate=array
+												(
+														'UD_USER_ID'=>$useridgen,
+												);
+												
+												User::where('UD_ID_PK',$userid)->update($useridupdate);
 												$len=count($products);
 												
 												for($j=0; $j<$len; $j++)
@@ -253,6 +294,8 @@ class UserController extends BaseController {
 	}
 	
 	
+	
+	
 	public function postForgetpass()
 	{
 		$postdata=file_get_contents("php://input");
@@ -261,7 +304,33 @@ class UserController extends BaseController {
 			$email=Input::get('email');
 			if($email)
 			{
-			User::where('UD_USER_EMAIL','=',$email)->get();
+				$checkemail=User::where('UD_USER_EMAIL','=',$email)->get();
+				if(count($checkemail)>0)
+				{
+					foreach ($checkemail as $checkemails){}
+					
+					
+					$usernewkey=md5($checkemails->UD_ID_PK.$checkemails->UD_USER_ID);
+					$usernewkeygen=$checkemails->UD_ID_PK.$checkemails->UD_USER_ID;
+					$pass=array
+					(
+						'UD_USER_KEY'=>$usernewkey,	
+						'USER_FLAG'=>1,							
+					);
+					Session::put('usremail',$checkemails->UD_USER_EMAIL);
+					Mail::send('users.mails.forget', array('password'=>$usernewkeygen), function($message)
+					{
+						$message->to(Session::get('usremail'))->subject('Reg: New Password For Appandukan Account');
+					});
+					Session::forget('usremail');
+					User::where('UD_ID_PK',$checkemails->UD_ID_PK)->update($pass);
+					return Response::json(array('status' => 'success', 'message' => 'Password Rest is Successfull. You New Password is Send To your Mail'));
+					
+				}
+				else
+				{
+					return Response::json(array('status' => 'failure', 'message' => 'Email Does Not Exist'));
+				}
 			}
 			else
 			{
@@ -299,6 +368,26 @@ class UserController extends BaseController {
 					$balance=0;
 				}
 				
+				foreach ($userdetails as $userdetailsnew){}
+				if($userdetailsnew->USER_FLAG==1)
+				{
+					$updateflag=array
+					(
+						'USER_FLAG'=>0	
+					);
+					$userflagnew=1;
+				}
+				else
+				{
+					$updateflag=array
+					(
+							'USER_FLAG'=>0
+					);
+					$userflagnew=0;
+				}
+				
+				User::where('UD_USER_ID','=',$userId)->update($updateflag);
+				
 				foreach($userdetails as $userdetailss)
 				{
 				}
@@ -320,6 +409,7 @@ class UserController extends BaseController {
 						'userType'=> $userdetailss->UD_USER_TYPE,
 						'userAddress1'=> $userdetailss->UD_USER_ADDRESS1,
 						'userAddress2'=> $userdetailss->UD_USER_ADDRESS2,
+						'userFlag'=> $userflagnew,
 						'status'=> "success"
 					));
 			}
@@ -437,7 +527,7 @@ class UserController extends BaseController {
 				$getproductsmultidemsional=Commonmodel::is_multi2($getproducts);
 				if(empty($getproductsmultidemsional))
 				{	
-					exit;
+		
 					$final_products=Commonmodel::converarray2to1($getproducts);
 				}
 				elseif(!empty($getproductsmultidemsional))
@@ -448,9 +538,6 @@ class UserController extends BaseController {
 				{
 					$final_products=array();
 				}
-				
-				
-				
 				
 				return Response::json(array('categories'=>$final_category, 'message'=> 'Products fetched', 'status'=> 'success','products'=>$final_products,));
 			}
@@ -509,6 +596,7 @@ class UserController extends BaseController {
 						'userType'=> $userdetailss->UD_USER_TYPE,
 						'userAddress1'=> $userdetailss->UD_USER_ADDRESS1,
 						'userAddress2'=> $userdetailss->UD_USER_ADDRESS2,
+						'user_count'=> $userdetailss->UD_USER_CREATE_COUNT,
 						'status'=> "success"
 					));	
 			}
@@ -551,6 +639,7 @@ class UserController extends BaseController {
 								'userIdPk'=> $checkbalances->ufin_user_id_pk_fk,
 								'userId'=> $checkbalances->ufin_user_id,
 								'totalCommissionEarned'=> $checkbalances->ufin_comm_earned,
+								'lock_balance'=> $checkbalances->ufin_lock_balance,
 							);
 						}
 					}
@@ -662,6 +751,79 @@ class UserController extends BaseController {
 		
 	}
 	
+	public function getBalancedetection()
+	{
+		
+		
+			$balanedetection=Balancedetection::all();
+			if(count($balanedetection)>0)
+			{
+				
+				
+				
+				return Response::json($input=array
+						(
+								'SA'=> "".$balanedetection[0]->user_reg_count."",
+								'SAS'=>"".$balanedetection[1]->user_reg_count."",
+								'SP'=>"".$balanedetection[2]->user_reg_count."",
+								'SPS'=>"".$balanedetection[3]->user_reg_count."",
+								'SD'=>"".$balanedetection[4]->user_reg_count."",
+								'SDS'=>"".$balanedetection[5]->user_reg_count."",
+								'D'=>"".$balanedetection[6]->user_reg_count."",
+								'DS'=>"".$balanedetection[7]->user_reg_count."",
+								'FR'=>"".$balanedetection[8]->user_reg_count."",
+								'FRS'=>"".$balanedetection[9]->user_reg_count."",
+								'SFR'=>"".$balanedetection[10]->user_reg_count."",
+								'SFRS'=>"".$balanedetection[11]->user_reg_count."",
+						));	
+				
+			}
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'There is no records'));
+			}
+		
+		
+	}
+	
+	public function postUpdatelockbalance()
+	{
+		$postdata=file_get_contents("php://input");
+		if(!empty($postdata))
+		{
+			$currentdate=Commonmodel::dateandtime();
+			$userIdPk=Input::get('userIdPk');
+			$userId=Input::get('userId');
+			$currentUserId=Input::get('currentUserId');
+			$currentUserIdPk=Input::get('currentUserIdPk');
+			$parentId=Input::get('parentId');
+			$parentIdPk=Input::get('parentIdPk');
+			$clientIP=Input::get('clientIP');
+			$amount=Input::get('amount');
+			$feePerc=Input::get('feePerc');
+			
+			$currentbalance=Userfinance::where('ufin_user_id','=',$userId)->pluck('ufin_main_balance');
+			if($currentbalance>$amount)
+			{
+				$balanceupdt=array
+				(
+						'ufin_lock_balance'=>$amount,
+				);
+				Userfinance::where('ufin_user_id','=',$userId)->update($balanceupdt);
+				return Response::json(array('status' => 'success', 'message' => 'Your Lock Balance Updated Successfully'));
+			}
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'Yor main balance is too low . Your Lock balance cannot be updated'));
+			}
+				
+		}
+		else
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'Fill All Manditary Fields'));
+		}
+		
+	}
 	
 	public function getCheckmobilenumber($id)
 	{
@@ -729,6 +891,11 @@ class UserController extends BaseController {
 		
 	}
 	
+	public function postCheckuserid()
+	{
+		
+	}
+	
 	public function postUpdateuser()
 	{
 		$postdata=file_get_contents("php://input");
@@ -737,7 +904,6 @@ class UserController extends BaseController {
 			$userName=Input::get('userName');
 			$userEmail=Input::get('userEmail');
 			$userMobile=Input::get('userMobile');
-			$userId=Input::get('userId');
 			$currentUserId=Input::get('currentUserId');
 			$currentUserIdPk=Input::get('currentUserIdPk');
 			$parentId=Input::get('parentId');
@@ -752,8 +918,9 @@ class UserController extends BaseController {
 			$userType=Input::get('userType');
 			$products=Input::get('products');
 			$userKey=Input::get('userKey');
+			$usercount=Input::get('user_count');
 			$editeddate=Commonmodel::dateandtime();
-			if($userName!=""&&$userEmail!=""&&$userMobile!=""&&$userId!=""&&$currentUserId!=""&&$currentUserIdPk!=""&&$parentId!=""&&$parentIdPk!=""&&$userIdPk!=""&&$userAddress1!=""&&$userAddress2!=""&&$userCity!=""&&$userState!=""&&$userState!=""&&$userPincode!=""&&$userStatus!=""&&$userType!='')
+			if($userName!=""&&$userEmail!=""&&$userMobile!=""&&$currentUserId!=""&&$currentUserIdPk!=""&&$parentId!=""&&$parentIdPk!=""&&$userIdPk!=""&&$userAddress1!=""&&$userAddress2!=""&&$userCity!=""&&$userState!=""&&$userState!=""&&$userPincode!=""&&$userStatus!=""&&$userType!='')
 			{
 				$checkueremail=User::where('UD_ID_PK','!=',$userIdPk)->where('UD_USER_EMAIL','=',$userEmail)->get();
 				if(count($checkueremail)>0)
@@ -769,8 +936,8 @@ class UserController extends BaseController {
 					}
 					else
 					{
-						$checkuser=User::where('UD_ID_PK','!=',$userIdPk)->where('UD_USER_ID','=',$userId)->get();
-						if(count($checkuser)>0)
+						$checkuser=User::where('UD_ID_PK','!=',$userIdPk)->get();
+						if(count($checkuser)==0)
 						{
 							return Response::json(array('status' => 'failure', 'message' => 'User ID Already Exist'));	
 						}
@@ -779,9 +946,14 @@ class UserController extends BaseController {
 						
 							if($userKey)
 							{
+										if(empty($usercount))
+										{
+											$usercount=0;
+										}
+										
 										$input=array(
 									
-											'UD_USER_ID'=>Input::get('userId'),
+											
 											'UD_USER_NAME'=>Input::get('userName'),
 											'UD_USER_KEY'=>md5(Input::get('userKey')),
 											'UD_PARENT_ID'=>Input::get('parentIdPk'),
@@ -796,13 +968,15 @@ class UserController extends BaseController {
 											'UD_USER_STATUS'=>Input::get('userStatus'),
 											'UD_EDITED_AT'=>$editeddate,
 											'UD_EDITED_BY'=>Input::get('currentUserId'),
+											'UD_USER_CREATE_COUNT'=>$usercount,
 										);
 										
-										User::where('UD_USER_ID','=',$userId)->update($input);
+										User::where('UD_ID_PK','=',$userIdPk)->update($input);
+										$getnewuserid=User::where('UD_ID_PK','=',$userIdPk)->pluck('UD_USER_ID');
 																	
 										if(count($products)>0)
 										{
-											Userproductaccess::where('UD_USER_ID', '=', $userId)->delete();
+											Userproductaccess::where('UD_ID_PK', '=', $userIdPk)->delete();
 											$len=count($products);
 											for($j=0; $j<$len; $j++)
 											{
@@ -811,7 +985,7 @@ class UserController extends BaseController {
 												(
 													'upa_prod_code'=>$products[$j]['prodCode'],
 													'upa_ud_user_id'=>$products[$j]['prodStatus'],
-													'upa_access_status'=>$userId,
+													'upa_access_status'=>$getnewuserid,
 													'upa_created_at'=>$editeddate,
 													'upa_created_by'=>$currentUserId,
 												);
@@ -828,7 +1002,7 @@ class UserController extends BaseController {
 								
 										$input=array(
 									
-											'UD_USER_ID'=>Input::get('userId'),
+											
 											'UD_USER_NAME'=>Input::get('userName'),
 											'UD_PARENT_ID'=>Input::get('parentIdPk'),
 											'UD_USER_TYPE'=>Input::get('userType'),
@@ -842,13 +1016,16 @@ class UserController extends BaseController {
 											'UD_USER_STATUS'=>Input::get('userStatus'),
 											'UD_EDITED_AT'=>$editeddate,
 											'UD_EDITED_BY'=>Input::get('currentUserId'),
+											'UD_USER_CREATE_COUNT'=>$usercount,
 										);
 										
-										User::where('UD_USER_ID','=',$userId)->update($input);
+										
+										User::where('UD_ID_PK','=',$userIdPk)->update($input);
+										$getnewuserid=User::where('UD_ID_PK','=',$userIdPk)->pluck('UD_USER_ID');
 										
 										if(count($products)>0)
 										{
-											Userproductaccess::where('upa_ud_user_id', '=', $userId)->delete();
+											Userproductaccess::where('upa_ud_user_id', '=', $userIdPk)->delete();
 											$len=count($products);
 											for($j=0; $j<$len; $j++)
 											{
@@ -856,7 +1033,7 @@ class UserController extends BaseController {
 												$productinput=array
 												(
 													'upa_prod_code'=>$products[$j]['prodCode'],
-													'upa_ud_user_id'=>$userId,
+													'upa_ud_user_id'=>$getnewuserid,
 													'upa_access_status'=>$products[$j]['prodStatus'],
 													'upa_created_at'=>$editeddate,
 													'upa_created_by'=>$currentUserId,
@@ -887,6 +1064,45 @@ class UserController extends BaseController {
 		}
 		
 	}
+	
+	public function getState()
+	{
+		$staesp=State::all();
+		if(count($staesp)>0)
+		{
+			return Response::json($staesp);
+		}
+		else
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'There is No state in State Table'));
+		}
+		
+	}
+	
+	public function postStateupdate()
+	{
+
+		$postdata=file_get_contents("php://input");
+		if(!empty($postdata))
+		{
+			$userid=Input::get('userId');
+			$userCount=Input::get('userCount');
+			$updatecount=array
+			(
+					'adt_state_count'=>$userCount,
+			);
+			
+			User::where('adt_state_id','=',$userid)->update($updatecount);
+			return Response::json(array('status' => 'success', 'message' => 'User Count Updated Successfully'));
+		}
+		else
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'There is No state in State Table'));
+		}
+	}
+	
+	
+	
 	
 	
 	
