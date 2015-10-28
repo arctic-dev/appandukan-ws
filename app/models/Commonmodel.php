@@ -118,6 +118,24 @@ class Commonmodel extends Eloquent implements UserInterface, RemindableInterface
     return false;
 }
 
+	public static function fetchUserdetails($id) 
+	{
+		$SAbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_TYPE','=',$id)->get();
+		if(count($SAbalance)>0)
+		{
+			$balnce = 0;
+			foreach($SAbalance as $bal)
+			{
+				$balnce = $balnce + $bal->ufin_main_balance;
+			}
+			return $balnce;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
 
 
 	

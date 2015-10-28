@@ -235,5 +235,54 @@ class PanoffilineController extends BaseController {
 				return Response::json(array('status' => 'failure', 'message' => 'You Don"t have any data to Import in Coupon'));
 			}
 	}
-
+	public function postRefund()
+	{
+		$postdata=Input::all();
+		$panIDPK = Input::get('pan_id_pk');
+		
+		if(!$panIDPK)
+		{
+			return Response::json(array('status'=>"failed",'message'=>'Please send a PAN ID'));
+		}
+		else
+		{
+			$response=Panoffiline::where('pan_id_pk',$panIDPK)->get();
+			if($response)
+			{
+				foreach($response as $res)
+				{
+					$userfinID = $res->pan_created_by;
+					$panCoupenNo = $res->pan_coupon_no;
+					$mainBalance = Userfinance::where('ufin_user_id',$userfinID)->pluck('ufin_main_balance');
+					$panTotBal = $mainBalance + 106;
+					$balanceDebit = array(
+							'ufin_main_balance' => $panTotBal,
+					);
+					if($panCoupenNo != '0'){
+						Userfinance::where('ufin_user_id','=',$userfinID)->update($balanceDebit);
+						$coupenReset = array(
+								'pan_coupon_no' => '',
+						);
+						Panoffiline::where('pan_id_pk','=',$panIDPK)->update($coupenReset);
+						$panCoupenUpdate = array(
+								'pc_coupon_no' => $panCoupenNo,
+						);
+						$coupen = new Coupons;
+						$coupen->create($panCoupenUpdate);
+						return Response::json(array('status'=>"success",'message'=>'Amount debited successfully'));
+					}
+					else
+					{
+						return Response::json(array('status'=>"failure",'message'=>'PAN Card has been already applied for refund'));
+					}
+				}
+			}
+			else
+			{
+				return Response::json(array('status'=>"failure",'message'=>'No PAN card found for this ID'));
+			}
+		}
+		
+	}
+	
 }

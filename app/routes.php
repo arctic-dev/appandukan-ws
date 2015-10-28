@@ -20,5 +20,6 @@ Route::controller('pancardoffline','PanoffilineController');
 Route::controller('recharge','RechargeController');
 Route::controller('itr','ItrController');
 Route::controller('service','ServiceController');
+Route::controller('ledgerreport','LedgerController');
 
 Route::Controller('icash','IcashController');
