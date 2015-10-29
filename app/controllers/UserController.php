@@ -891,11 +891,6 @@ class UserController extends BaseController {
 		
 	}
 	
-	public function postCheckuserid()
-	{
-		
-	}
-	
 	public function postUpdateuser()
 	{
 		$postdata=file_get_contents("php://input");

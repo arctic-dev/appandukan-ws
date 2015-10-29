@@ -5224,3 +5224,145 @@ Stack trace:
 #16 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(657): Stack\StackedHttpKernel->handle(Object(Illuminate\Http\Request))
 #17 C:\xampp\htdocs\appandukan-ws\index.php(49): Illuminate\Foundation\Application->run()
 #18 {main} [] []
+[2015-10-29 09:02:20] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare UserController::postCheckuserid()' in C:\xampp\htdocs\appandukan-ws\app\controllers\UserController.php:894
+Stack trace:
+#0 [internal function]: Illuminate\Exception\Handler->handleShutdown()
+#1 {main} [] []
+[2015-10-29 09:02:37] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare UserController::postCheckuserid()' in C:\xampp\htdocs\appandukan-ws\app\controllers\UserController.php:894
+Stack trace:
+#0 [internal function]: Illuminate\Exception\Handler->handleShutdown()
+#1 {main} [] []
+[2015-10-29 09:02:47] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare UserController::postCheckuserid()' in C:\xampp\htdocs\appandukan-ws\app\controllers\UserController.php:894
+Stack trace:
+#0 [internal function]: Illuminate\Exception\Handler->handleShutdown()
+#1 {main} [] []
+[2015-10-29 09:03:58] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare UserController::postCheckuserid()' in C:\xampp\htdocs\appandukan-ws\app\controllers\UserController.php:894
+Stack trace:
+#0 [internal function]: Illuminate\Exception\Handler->handleShutdown()
+#1 {main} [] []
+[2015-10-29 09:04:09] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare UserController::postCheckuserid()' in C:\xampp\htdocs\appandukan-ws\app\controllers\UserController.php:894
+Stack trace:
+#0 [internal function]: Illuminate\Exception\Handler->handleShutdown()
+#1 {main} [] []
+[2015-10-29 09:04:13] production.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Cannot redeclare UserController::postCheckuserid()' in C:\xampp\htdocs\appandukan-ws\app\controllers\UserController.php:894
+Stack trace:
+#0 [internal function]: Illuminate\Exception\Handler->handleShutdown()
+#1 {main} [] []
+[2015-10-29 15:01:51] production.ERROR: exception 'ErrorException' with message 'Undefined variable: userType' in C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php:35
+Stack trace:
+#0 C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php(35): Illuminate\Exception\Handler->handleError(8, 'Undefined varia...', 'C:\\xampp\\htdocs...', 35, Array)
+#1 [internal function]: LedgerController->postDashboard()
+#2 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(231): call_user_func_array(Array, Array)
+#3 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5834): Illuminate\Routing\Controller->callAction('postDashboard', Array)
+#4 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5822): Illuminate\Routing\ControllerDispatcher->call(Object(LedgerController), Object(Illuminate\Routing\Route), 'postDashboard')
+#5 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5027): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request), 'LedgerControlle...', 'postDashboard')
+#6 [internal function]: Illuminate\Routing\Router->Illuminate\Routing\{closure}()
+#7 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5385): call_user_func_array(Object(Closure), Array)
+#8 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5052): Illuminate\Routing\Route->run(Object(Illuminate\Http\Request))
+#9 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5040): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#10 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(715): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#11 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(696): Illuminate\Foundation\Application->dispatch(Object(Illuminate\Http\Request))
+#12 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(7812): Illuminate\Foundation\Application->handle(Object(Illuminate\Http\Request), 1, true)
+#13 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8419): Illuminate\Session\Middleware->handle(Object(Illuminate\Http\Request), 1, true)
+#14 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8366): Illuminate\Cookie\Queue->handle(Object(Illuminate\Http\Request), 1, true)
+#15 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(11029): Illuminate\Cookie\Guard->handle(Object(Illuminate\Http\Request), 1, true)
+#16 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(657): Stack\StackedHttpKernel->handle(Object(Illuminate\Http\Request))
+#17 C:\xampp\htdocs\appandukan-ws\index.php(49): Illuminate\Foundation\Application->run()
+#18 {main} [] []
+[2015-10-29 21:11:53] production.ERROR: exception 'PDOException' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'lr_date' in 'where clause'' in C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php:299
+Stack trace:
+#0 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php(299): PDO->prepare('select * from `...')
+#1 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php(617): Illuminate\Database\Connection->Illuminate\Database\{closure}(Object(Illuminate\Database\MySqlConnection), 'select * from `...', Array)
+#2 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php(581): Illuminate\Database\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#3 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php(304): Illuminate\Database\Connection->run('select * from `...', Array, Object(Closure))
+#4 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php(1398): Illuminate\Database\Connection->select('select * from `...', Array)
+#5 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php(1383): Illuminate\Database\Query\Builder->runSelect()
+#6 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php(1370): Illuminate\Database\Query\Builder->getFresh(Array)
+#7 C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php(154): Illuminate\Database\Query\Builder->get()
+#8 [internal function]: LedgerController->postDailycommission()
+#9 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(231): call_user_func_array(Array, Array)
+#10 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5834): Illuminate\Routing\Controller->callAction('postDailycommis...', Array)
+#11 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5822): Illuminate\Routing\ControllerDispatcher->call(Object(LedgerController), Object(Illuminate\Routing\Route), 'postDailycommis...')
+#12 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5027): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request), 'LedgerControlle...', 'postDailycommis...')
+#13 [internal function]: Illuminate\Routing\Router->Illuminate\Routing\{closure}()
+#14 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5385): call_user_func_array(Object(Closure), Array)
+#15 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5052): Illuminate\Routing\Route->run(Object(Illuminate\Http\Request))
+#16 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5040): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#17 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(715): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#18 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(696): Illuminate\Foundation\Application->dispatch(Object(Illuminate\Http\Request))
+#19 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(7812): Illuminate\Foundation\Application->handle(Object(Illuminate\Http\Request), 1, true)
+#20 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8419): Illuminate\Session\Middleware->handle(Object(Illuminate\Http\Request), 1, true)
+#21 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8366): Illuminate\Cookie\Queue->handle(Object(Illuminate\Http\Request), 1, true)
+#22 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(11029): Illuminate\Cookie\Guard->handle(Object(Illuminate\Http\Request), 1, true)
+#23 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(657): Stack\StackedHttpKernel->handle(Object(Illuminate\Http\Request))
+#24 C:\xampp\htdocs\appandukan-ws\index.php(49): Illuminate\Foundation\Application->run()
+#25 {main}
+
+Next exception 'Illuminate\Database\QueryException' with message 'SQLSTATE[42S22]: Column not found: 1054 Unknown column 'lr_date' in 'where clause' (SQL: select * from `adt_recharge_ledger` left join `adt_user_details` on `adt_recharge_ledger`.`rchlgr_fr_id` = `adt_user_details`.`UD_ID_PK` where `adt_user_details`.`UD_USER_TYPE` = FR and `lr_date` between 2015-10-29  00:00:00 and 2015-10-29  23:59:59)' in C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php:625
+Stack trace:
+#0 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php(581): Illuminate\Database\Connection->runQueryCallback('select * from `...', Array, Object(Closure))
+#1 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Connection.php(304): Illuminate\Database\Connection->run('select * from `...', Array, Object(Closure))
+#2 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php(1398): Illuminate\Database\Connection->select('select * from `...', Array)
+#3 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php(1383): Illuminate\Database\Query\Builder->runSelect()
+#4 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php(1370): Illuminate\Database\Query\Builder->getFresh(Array)
+#5 C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php(154): Illuminate\Database\Query\Builder->get()
+#6 [internal function]: LedgerController->postDailycommission()
+#7 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(231): call_user_func_array(Array, Array)
+#8 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5834): Illuminate\Routing\Controller->callAction('postDailycommis...', Array)
+#9 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5822): Illuminate\Routing\ControllerDispatcher->call(Object(LedgerController), Object(Illuminate\Routing\Route), 'postDailycommis...')
+#10 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5027): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request), 'LedgerControlle...', 'postDailycommis...')
+#11 [internal function]: Illuminate\Routing\Router->Illuminate\Routing\{closure}()
+#12 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5385): call_user_func_array(Object(Closure), Array)
+#13 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5052): Illuminate\Routing\Route->run(Object(Illuminate\Http\Request))
+#14 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5040): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#15 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(715): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#16 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(696): Illuminate\Foundation\Application->dispatch(Object(Illuminate\Http\Request))
+#17 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(7812): Illuminate\Foundation\Application->handle(Object(Illuminate\Http\Request), 1, true)
+#18 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8419): Illuminate\Session\Middleware->handle(Object(Illuminate\Http\Request), 1, true)
+#19 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8366): Illuminate\Cookie\Queue->handle(Object(Illuminate\Http\Request), 1, true)
+#20 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(11029): Illuminate\Cookie\Guard->handle(Object(Illuminate\Http\Request), 1, true)
+#21 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(657): Stack\StackedHttpKernel->handle(Object(Illuminate\Http\Request))
+#22 C:\xampp\htdocs\appandukan-ws\index.php(49): Illuminate\Foundation\Application->run()
+#23 {main} [] []
+[2015-10-29 21:12:43] production.ERROR: exception 'ErrorException' with message 'Undefined variable: output' in C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php:155
+Stack trace:
+#0 C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php(155): Illuminate\Exception\Handler->handleError(8, 'Undefined varia...', 'C:\\xampp\\htdocs...', 155, Array)
+#1 [internal function]: LedgerController->postDailycommission()
+#2 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(231): call_user_func_array(Array, Array)
+#3 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5834): Illuminate\Routing\Controller->callAction('postDailycommis...', Array)
+#4 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5822): Illuminate\Routing\ControllerDispatcher->call(Object(LedgerController), Object(Illuminate\Routing\Route), 'postDailycommis...')
+#5 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5027): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request), 'LedgerControlle...', 'postDailycommis...')
+#6 [internal function]: Illuminate\Routing\Router->Illuminate\Routing\{closure}()
+#7 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5385): call_user_func_array(Object(Closure), Array)
+#8 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5052): Illuminate\Routing\Route->run(Object(Illuminate\Http\Request))
+#9 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5040): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#10 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(715): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#11 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(696): Illuminate\Foundation\Application->dispatch(Object(Illuminate\Http\Request))
+#12 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(7812): Illuminate\Foundation\Application->handle(Object(Illuminate\Http\Request), 1, true)
+#13 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8419): Illuminate\Session\Middleware->handle(Object(Illuminate\Http\Request), 1, true)
+#14 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8366): Illuminate\Cookie\Queue->handle(Object(Illuminate\Http\Request), 1, true)
+#15 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(11029): Illuminate\Cookie\Guard->handle(Object(Illuminate\Http\Request), 1, true)
+#16 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(657): Stack\StackedHttpKernel->handle(Object(Illuminate\Http\Request))
+#17 C:\xampp\htdocs\appandukan-ws\index.php(49): Illuminate\Foundation\Application->run()
+#18 {main} [] []
+[2015-10-29 21:14:00] production.ERROR: exception 'ErrorException' with message 'Undefined variable: fraBalance' in C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php:157
+Stack trace:
+#0 C:\xampp\htdocs\appandukan-ws\app\controllers\LedgerController.php(157): Illuminate\Exception\Handler->handleError(8, 'Undefined varia...', 'C:\\xampp\\htdocs...', 157, Array)
+#1 [internal function]: LedgerController->postDailycommission()
+#2 C:\xampp\htdocs\appandukan-ws\vendor\laravel\framework\src\Illuminate\Routing\Controller.php(231): call_user_func_array(Array, Array)
+#3 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5834): Illuminate\Routing\Controller->callAction('postDailycommis...', Array)
+#4 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5822): Illuminate\Routing\ControllerDispatcher->call(Object(LedgerController), Object(Illuminate\Routing\Route), 'postDailycommis...')
+#5 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5027): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request), 'LedgerControlle...', 'postDailycommis...')
+#6 [internal function]: Illuminate\Routing\Router->Illuminate\Routing\{closure}()
+#7 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5385): call_user_func_array(Object(Closure), Array)
+#8 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5052): Illuminate\Routing\Route->run(Object(Illuminate\Http\Request))
+#9 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(5040): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#10 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(715): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#11 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(696): Illuminate\Foundation\Application->dispatch(Object(Illuminate\Http\Request))
+#12 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(7812): Illuminate\Foundation\Application->handle(Object(Illuminate\Http\Request), 1, true)
+#13 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8419): Illuminate\Session\Middleware->handle(Object(Illuminate\Http\Request), 1, true)
+#14 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(8366): Illuminate\Cookie\Queue->handle(Object(Illuminate\Http\Request), 1, true)
+#15 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(11029): Illuminate\Cookie\Guard->handle(Object(Illuminate\Http\Request), 1, true)
+#16 C:\xampp\htdocs\appandukan-ws\bootstrap\compiled.php(657): Stack\StackedHttpKernel->handle(Object(Illuminate\Http\Request))
+#17 C:\xampp\htdocs\appandukan-ws\index.php(49): Illuminate\Foundation\Application->run()
+#18 {main} [] []

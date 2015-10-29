@@ -636,10 +636,10 @@ public function getTransfer($name,$val)
 	return Response::json($response);
 }
 
-/*public function getBalance($balance)
+public function getBalance($balance)
 {
 	$update=Userfinance::where('ufin_user_id_pk_fk',1)->update(array('ufin_icash_balance'=>$balance));
-}*/
+}
 
 
 	
