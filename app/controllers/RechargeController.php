@@ -174,6 +174,48 @@ class RechargeController extends BaseController {
 	
 							$comissionnew= new Comission;
 							$comissionnew->create($comission);
+							
+							$getcomission=Recharge::where('rm_name','=',$provider)->get();
+							if($getcomission)
+							{
+								foreach($getcomission as $getcomissions){}
+								$admincomission=$getcomissions->rm_commission;
+								$statepartner=$getcomissions->rm_scommission;
+								$statedistributer=$getcomissions->rm_sdcommission;
+								$distributer=$getcomissions->rm_dcommission;
+								$franchise=$getcomissions->rm_fcommission;
+								$subfranchise=$getcomissions->rm_sfcommission;
+								
+								$getusertype=User::where('UD_USER_ID','=',$currentUserId)->pluck('UD_USER_TYPE');
+								if($getusertype=='SF')
+								{
+									$getcomission=array
+									(
+										'rchlgr_sa_commission'=>$amount/$admincomission,
+										'rchlgr_sp_commission'=>$amount/$statepartner,
+										'rchlgr_sd_commission'=>$amount/$statedistributer,
+										'rchlgr_d_commission'=>$amount/$distributer,
+										'rchlgr_fr_commission'=>$amount/$franchise,
+									);
+									
+								}
+								elseif($getusertype=='SFR')
+								{
+									$getcomission=array
+									(
+											'rchlgr_sa_commission'=>$amount/$admincomission,
+											'rchlgr_sp_commission'=>$amount/$statepartner,
+											'rchlgr_sd_commission'=>$amount/$statedistributer,
+											'rchlgr_d_commission'=>$amount/$distributer,
+											'rchlgr_fr_commission'=>$amount/$franchise,
+											'rchlgr_sfr_commission'=>$amount/$subfranchise,
+									);
+									
+									
+								} 
+								
+							}
+							
 							return Response::json(array('status' => 'success', 'message' => 'Recharge Done Successfully'));
 						}
 						elseif($getstatus[4]!='Transaction Pending'||$getstatus[4]!='Timeout')
@@ -204,8 +246,8 @@ class RechargeController extends BaseController {
 							$comission=array
 							(
 									'lr_date'=>$currenttime,
-									'lr_trans_type'=>'Debited',
-									'lr_comment'=>'Debited by Easy Pay API',
+									'lr_trans_type'=>'DB',
+									'lr_comment'=>'Recharge',
 									'lr_debit_amount'=>$amount,
 									'lr_post_balance'=>$currentbalnce,
 									'lr_created_by'=>$currentUserId,
@@ -364,8 +406,8 @@ class RechargeController extends BaseController {
 							$comission=array
 							(
 									'lr_date'=>$currenttime,
-									'lr_trans_type'=>'Debited',
-									'lr_comment'=>'Debited by Easy Pay API',
+									'lr_trans_type'=>'DB',
+									'lr_comment'=>'Recharge',
 									'lr_debit_amount'=>$amount,
 									'lr_post_balance'=>$currentbalnce,
 									'lr_created_by'=>$currentUserId,
@@ -411,21 +453,35 @@ class RechargeController extends BaseController {
 		$balance=$getbalance[0];
 		$date=$getbalance[1];
 		$status=$getbalance[2];
-	
 		return Response::json(array('balance' => $balance, 'status' => $status));
-	
 	}
 	
 	public function getStatus()
 	{
 		$getbalance=Rechargeurl::status();
-		$formatter = Formatter::make($getbalance, Formatter::JSON);
-		//	$json  = $getbalance->toJson();
-		$xml = XmlParser::load($formatter);
-		print_r($formatter);
-		exit;
-		return Response::json(array('balance' => $balance, 'status' => $status));
-	
+		if($getbalance)
+		{
+		$new_array=Commonmodel::arr($getbalance);
+		$finalarray=$new_array['RESPONSERECHARGEINFO']['SOPERATOR'];
+			foreach ($finalarray as $new_arrays)
+			{
+				$status=$new_arrays['DESCRIPTION'];
+				if($status='APPAN DUKAN MARKETING')
+				{
+					$input=array
+					(
+							'rd_result'=>'Success',
+					);
+					Recharge::where('rd_trans_id','=',$new_arrays['RESPONSEID'])->update($input);
+				}
+			}
+			
+			return Response::json(array('status' => 'Success', 'message' => 'Status Updated Successfully'));
+		}
+		else
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'No Transaction History'));
+		}
 	}
 	
 

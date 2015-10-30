@@ -26,55 +26,160 @@ class PanoffilineController extends BaseController {
 	}
 	public function postHistory()
 	{
-			$frlist=DB::table('adt_user_details')->select('UD_USER_ID','UD_ID_PK')->where('UD_PARENT_ID',Input::get('currentUserIdPk'))->get();
-			
-				//print_r($frlist); 
-				$arr=array();
-				if(!empty($frlist))
+			$postdata=file_get_contents("php://input");
+			if(!empty($postdata))
+			{
+				$currentUserId=Input::get('currentUserId');
+				$currentUserIdPk=Input::get('currentUserIdPk');
+				$clientIp=Input::get('clientIp');
+				$limit=Input::get('limit');
+				$usercount=User::select('UD_USER_ID','UD_USER_TYPE')->where('UD_USER_ID','=',$currentUserId)->get();
+				if(count($usercount)>0)
 				{
-				foreach ($frlist as $user) {
-				$arr[]=$user->UD_USER_ID;
-				$arr1[]=$user->UD_ID_PK;
-				}
-
-				$rtlist=DB::table('adt_user_details')->select('UD_USER_ID','UD_ID_PK')->whereIn('UD_PARENT_ID',$arr1)->get();
-				//print_r($rtlist); exit;
-				if(!empty($rtlist))
-				{
-				foreach ($rtlist as $retailer) {
-				$arr[]=$retailer->UD_USER_ID;
-				$arr2[]=$retailer->UD_ID_PK;
+					if($usercount[0]->UD_USER_TYPE=='SA')
+					{
+						$panc=Panoffiline::all();
+						if(count($panc)>0)
+						{
+								foreach($panc as $pancc)
+								{
+									$getdetails[]=array
+									(
+									
+											"idPk"=> $pancc->pan_id_pk,
+											"couponNo"=>$pancc->pan_coupon_no,
+											"title"=> $pancc->pan_title,
+											"firstName"=> $pancc->pan_first_name,
+											"middleName"=> $pancc->pan_middle_name,
+											"lastName"=> $pancc->pan_last_name,
+											"nameAbbrv"=> $pancc->pan_name_abbrv,
+											"dob"=> $pancc->pan_dob,
+											"fatherFname"=> $pancc->pan_father_fname,
+											"fatherMname"=> $pancc->pan_father_mname,
+											"fatherLname"=> $pancc->pan_father_lname,
+											"countryCode"=> "".$pancc->pan_country_code."",
+											"areaCode"=> "".$pancc->pan_area_code."",
+											"contactNo"=> $pancc->pan_contact_no,
+											"emailId"=> $pancc->pan_email_id,
+											"createdAt"=> $pancc->pan_created_at,
+											"createdBy"=> $pancc->pan_created_by,
+											"refundStatus"=> $pancc->pan_refund_status,
+											"refundAt"=> $pancc->pan_refund_at,
+											"refundBy"=> $pancc->pan_refund_by,
+									);
+								}
+								return Response::json( $getdetails);
+							}
+							else
+							{
+								return Response::json(array('status' => 'failure', 'message' => 'You Din"t Create Any Pan card till Now'));
+							}
+						
+						
+						
+					}
+					elseif($usercount[0]->UD_USER_TYPE=='SAS')
+					{
+						$panc=Panoffiline::all();
+						if(count($panc)>0)
+						{
+							foreach($panc as $pancc)
+							{
+								$getdetails[]=array
+								(
+								
+										"idPk"=> $pancc->pan_id_pk,
+										"couponNo"=>$pancc->pan_coupon_no,
+										"title"=> $pancc->pan_title,
+										"firstName"=> $pancc->pan_first_name,
+										"middleName"=> $pancc->pan_middle_name,
+										"lastName"=> $pancc->pan_last_name,
+										"nameAbbrv"=> $pancc->pan_name_abbrv,
+										"dob"=> $pancc->pan_dob,
+										"fatherFname"=> $pancc->pan_father_fname,
+										"fatherMname"=> $pancc->pan_father_mname,
+										"fatherLname"=> $pancc->pan_father_lname,
+										"countryCode"=> "".$pancc->pan_country_code."",
+										"areaCode"=> "".$pancc->pan_area_code."",
+										"contactNo"=> $pancc->pan_contact_no,
+										"emailId"=> $pancc->pan_email_id,
+										"createdAt"=> $pancc->pan_created_at,
+										"createdBy"=> $pancc->pan_created_by,
+										"refundStatus"=> $pancc->pan_refund_status,
+										"refundAt"=> $pancc->pan_refund_at,
+										"refundBy"=> $pancc->pan_refund_by,
+								);
+							}
+							return Response::json( $getdetails);
+						}
+						else
+						{
+								return Response::json(array('status' => 'failure', 'message' => 'You Din"t Create Any Pan card till Now'));
+						}
+						
+						
+					}
+					elseif($usercount[0]->UD_USER_TYPE=='FR')
+					{
+						$panc=Panoffiline::where('pan_created_by','=',$usercount[0]->UD_USER_ID)->get();
+						
+						if(count($panc)>0)
+						{
+							foreach($panc as $pancc)
+							{
+								$getdetails[]=array
+								(
+								
+										"idPk"=> $pancc->pan_id_pk,
+										"couponNo"=>$pancc->pan_coupon_no,
+										"title"=> $pancc->pan_title,
+										"firstName"=> $pancc->pan_first_name,
+										"middleName"=> $pancc->pan_middle_name,
+										"lastName"=> $pancc->pan_last_name,
+										"nameAbbrv"=> $pancc->pan_name_abbrv,
+										"dob"=> $pancc->pan_dob,
+										"fatherFname"=> $pancc->pan_father_fname,
+										"fatherMname"=> $pancc->pan_father_mname,
+										"fatherLname"=> $pancc->pan_father_lname,
+										"countryCode"=> "".$pancc->pan_country_code."",
+										"areaCode"=> "".$pancc->pan_area_code."",
+										"contactNo"=> $pancc->pan_contact_no,
+										"emailId"=> $pancc->pan_email_id,
+										"createdAt"=> $pancc->pan_created_at,
+										"createdBy"=> $pancc->pan_created_by,
+										"refundStatus"=> $pancc->pan_refund_status,
+										"refundAt"=> $pancc->pan_refund_at,
+										"refundBy"=> $pancc->pan_refund_by,
+								);
+							}
+							return Response::json($getdetails);
+						}
+						else
+						{
+							return Response::json(array('status' => 'failure', 'message' => 'You Din"t Create Any Pan card till Now'));
+						}
+						
+						
+						return Response::json( $getdetails);
+					}
+					else
+					{
+						return Response::json(array('status' => 'failure', 'message' => 'You can"t Access the Pan Card'));
+					}
+					
+					
 					
 				}
-				$srlist=DB::table('adt_user_details')->select('UD_USER_ID','UD_ID_PK')->whereIn('UD_PARENT_ID',$arr2)->get();
-				//print_r($arr2);
-				foreach ($srlist as $subretailer) {
-				$arr[]=$subretailer->UD_USER_ID;
-				//$arr2[]=$user->UD_ID_PK;
-					
-				}
+				else 
+				{
+					return Response::json(array('status' => 'failure', 'message' => 'User ID Does Not Exist'));
+				}	
 			}
-				//print_r($arr); exit;
-			
-			
-				$Panhistory=DB::table('adt_pan_49a')->whereIn('pan_created_by',$arr)->get();
-				
-		//print_r($Rechargetotal); exit;
-			$response=array(
-					"status"=>"success",
-					"Panhistory"=>$Panhistory,
-					
-				);
-		}
-		else
-		{
-		$response=array
-					(
-					"status"=>"failure",
-					"message"=>"no PAN form has been submitted yet",
-					);	
-		}
-		return Response::json($response);
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'You Don"t have any coupon to register pancard'));
+			}
+
 	}
 
 	public function postCreate()
@@ -95,18 +200,30 @@ class PanoffilineController extends BaseController {
 			}
 			else
 			{
-					$checkbalance=Userfinance::where('ufin_user_id','=',$currentUserId)->where('ufin_main_balance','<=','106')->get();
+				$checktype=User::where('UD_USER_ID','=',$currentUserId)->pluck('UD_USER_TYPE');
+				if($checktype)
+				{
+					if($checktype!='FRS')
+					{
+						$checkbalance=DB::table('adt_user_finance')->where('ufin_user_id','=',$currentUserId)->where('ufin_main_balance','<=','106')->get();
+						$getbalance=Userfinance::where('ufin_user_id','=',$currentUserId)->pluck('ufin_main_balance');
+					}
+					else
+					{
+						$getnewuserdetails=User::where('UD_USER_ID','=',$currentUserId)->where('UD_USER_TYPE','=','FRS')->pluck('UD_PARENT_ID');
+						$checkbalance=DB::table('adt_user_finance')->where('ufin_user_id','=',$getnewuserdetails)->where('ufin_main_balance','<=','106')->get();
+						$getbalance=Userfinance::where('ufin_user_id','=',$getnewuserdetails)->pluck('ufin_main_balance');
+					}
 					$couponcheck=Coupons::orderBy('pc_coupon_no','ASC')->first()->pluck('pc_coupon_no');
 					if($couponcheck)
 					{
-						$getbalance=Userfinance::where('ufin_user_id','=',$currentUserId)->pluck('ufin_main_balance');
-						if(count($checkbalance)>0)
+						if($checkbalance||empty($getbalance)||!empty($checkbalance)||$getbalance<=0)
 						{
+							
 							return Response::json(array('status' => 'failure', 'message' => 'You Do not Have Sufficient Balance'));
 						}
 						else
 						{
-							
 							$input=array
 							(
 								'pan_coupon_no'=>$couponcheck,
@@ -134,15 +251,37 @@ class PanoffilineController extends BaseController {
 										(
 											'ufin_main_balance'=>$getbalance,
 										);
+							$procode=Products::where('prod_short_name','=','PANM')->pluck('prod_code');
+							$panledger=array
+							(
+									'lr_date'=>$currenttime,
+									'lr_trans_type'=>'DB',
+									'lr_comment'=>'Pan',
+									'lr_debit_amount'=>'106',
+									'lr_post_balance'=>$getbalance,
+									'lr_created_by'=>Input::get('currentUserId'),
+									'lr_prod_code'=>$procode,
+							);
+							
+							$panlegcreta = new Ledgerreport;
+							$panlegcreta->create($panledger);
 							Coupons::where('pc_coupon_no', '=',$couponcheck)->delete();
 							Userfinance::where('ufin_user_id',$currentUserId)->update($balance);
 							return Response::json(array('status' => 'fuccess', 'message' => 'Your Document for PAN card have Been Submitted Successfully'));
 						}
+						
+						
 					}
 					else
 					{
 						return Response::json(array('status' => 'failure', 'message' => 'You Don"t have any coupon to register pancard'));
 					}
+				}
+				else
+				{
+					return Response::json(array('status' => 'failure', 'message' => 'You Don"t have any coupon to register pancard'));
+				}
+			
 			}
 
 	}
@@ -153,8 +292,6 @@ class PanoffilineController extends BaseController {
 			if(!empty($id))
 			{
 				$userid=$id;
-			
-			
 				$check=Panoffiline::where('pan_created_by','=',$userid)->get();
 				if(count($check)>0)
 				{
@@ -239,49 +376,72 @@ class PanoffilineController extends BaseController {
 	{
 		$postdata=Input::all();
 		$panIDPK = Input::get('pan_id_pk');
-		
+		$currenttime=Commonmodel::dateandtime();
 		if(!$panIDPK)
 		{
 			return Response::json(array('status'=>"failed",'message'=>'Please send a PAN ID'));
 		}
 		else
 		{
-			$response=Panoffiline::where('pan_id_pk',$panIDPK)->get();
-			if($response)
+			$findrefuncid=Panoffiline::find($panIDPK);
+			if($findrefuncid)
 			{
-				foreach($response as $res)
+				$getcurrentuser=Panoffiline::where('pan_id_pk','=',$panIDPK)->pluck('pan_created_by');
+				$response=Panoffiline::where('pan_id_pk',$panIDPK)->get();
+				if($response)
 				{
-					$userfinID = $res->pan_created_by;
-					$panCoupenNo = $res->pan_coupon_no;
-					$mainBalance = Userfinance::where('ufin_user_id',$userfinID)->pluck('ufin_main_balance');
-					$panTotBal = $mainBalance + 106;
-					$balanceDebit = array(
-							'ufin_main_balance' => $panTotBal,
-					);
-					if($panCoupenNo != '0'){
-						Userfinance::where('ufin_user_id','=',$userfinID)->update($balanceDebit);
-						$coupenReset = array(
-								'pan_coupon_no' => '',
-						);
-						Panoffiline::where('pan_id_pk','=',$panIDPK)->update($coupenReset);
-						$panCoupenUpdate = array(
-								'pc_coupon_no' => $panCoupenNo,
-						);
-						$coupen = new Coupons;
-						$coupen->create($panCoupenUpdate);
-						return Response::json(array('status'=>"success",'message'=>'Amount debited successfully'));
-					}
-					else
+					foreach($response as $res)
 					{
-						return Response::json(array('status'=>"failure",'message'=>'PAN Card has been already applied for refund'));
+						$userfinID = $res->pan_created_by;
+						$panCoupenNo = $res->pan_coupon_no;
+						$mainBalance = Userfinance::where('ufin_user_id',$userfinID)->pluck('ufin_main_balance');
+						$panTotBal = $mainBalance + 106;
+						$balanceDebit = array(
+								'ufin_main_balance' => $panTotBal,
+						);
+						if($panCoupenNo != '0')
+						{
+							Userfinance::where('ufin_user_id','=',$userfinID)->update($balanceDebit);
+							$coupenReset = array(
+									'pan_coupon_no' => '',
+							);
+							Panoffiline::where('pan_id_pk','=',$panIDPK)->update($coupenReset);
+							$panCoupenUpdate = array(
+									'pc_coupon_no' => $panCoupenNo,
+							);
+							
+							$procode=Products::where('prod_short_name','=','PANM')->pluck('prod_code');
+							$panledger=array
+							(
+									'lr_date'=>$currenttime,
+									'lr_trans_type'=>'CR',
+									'lr_comment'=>'Pan Refund',
+									'lr_credit_amount'=>'106',
+									'lr_post_balance'=>$panTotBal,
+									'lr_created_by'=>$getcurrentuser,
+									'lr_prod_code'=>$procode,
+							);
+								
+							$panlegcreta = new Ledgerreport;
+							$panlegcreta->create($panledger);
+							
+							$coupen = new Coupons;
+							$coupen->create($panCoupenUpdate);
+							return Response::json(array('status'=>"success",'message'=>'Amount debited successfully'));
+						}
+						else
+						{
+							return Response::json(array('status'=>"failure",'message'=>'PAN Card has been already applied for refund'));
+						}
 					}
 				}
 			}
 			else
 			{
-				return Response::json(array('status'=>"failure",'message'=>'No PAN card found for this ID'));
+				return Response::json(array('status'=>"failure",'message'=>'No User found for this ID'));
 			}
 		}
+		
 		
 	}
 	

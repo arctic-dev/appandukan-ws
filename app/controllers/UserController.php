@@ -891,6 +891,31 @@ class UserController extends BaseController {
 		
 	}
 	
+	public function getDeactivateuser($id)
+	{
+		if(!empty($id))
+		{
+			$finduser=User::find($id);
+			if($finduser)
+			{
+				$updatestatus=array
+				(
+					'UD_USER_STATUS'=>'DA',			
+				);
+				User::where('UD_ID_PK','=',$id)->update($updatestatus);
+				return Response::json(array('status' => 'success', 'message' => 'User Deactivated Successfully'));
+			}
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'ID Does Not Exist'));
+			}
+		}
+		else
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'Fill All Manditary Fields'));
+		}
+	}
+	
 	public function postUpdateuser()
 	{
 		$postdata=file_get_contents("php://input");
@@ -1020,7 +1045,7 @@ class UserController extends BaseController {
 										
 										if(count($products)>0)
 										{
-											Userproductaccess::where('upa_ud_user_id', '=', $userIdPk)->delete();
+											Userproductaccess::where('upa_ud_user_id', '=', $getnewuserid)->delete();
 											$len=count($products);
 											for($j=0; $j<$len; $j++)
 											{
