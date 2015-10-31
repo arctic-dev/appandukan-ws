@@ -151,9 +151,31 @@ class LedgerController extends BaseController {
 		$startDate = $date." 00:00:00";
 		$endDate = $date." 23:59:59";
 		
-		$dailyCommission = DB::table('adt_recharge_ledger')->leftjoin('adt_user_details', 'adt_recharge_ledger.rchlgr_fr_id','=', 'adt_user_details.UD_ID_PK')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_recharge_ledger.rchlgr_date',array($startDate,$endDate))->get();
-		//$output = array();
-		return Response::json($dailyCommission);
+		$dailyCommission = DB::table('adt_recharge_ledger')->leftjoin('adt_user_details', 'adt_recharge_ledger.rchlgr_fr_id','=', 'adt_user_details.UD_ID_PK')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_recharge_ledger.rchlgr_date',array($startDate,$endDate))->get();
+		if($dailyCommission){
+			foreach($dailyCommission as $ds){
+				$amount = $ds->rchlgr_fr_commission;
+				$userid = $ds->rchlgr_fr_id;
+				$usertype = $ds->UD_USER_TYPE;
+				$date = $ds->rchlgr_date;
+				$type = $ds->lr_comment;
+				$output[] = array(
+						'Commission Amount' => $amount,
+						'User Id' => $userid,
+						'User_type' => $usertype,
+						'Date' => $date,
+						'Type' => $type,
+				);
+			}
+			
+		}else{
+			$output = array(
+					'status' => 'failure',
+					'message' => 'No results found',
+					
+			);
+		}
+		return Response::json($output);
 	}
 	
 	public function postDailybusiness()
@@ -162,9 +184,206 @@ class LedgerController extends BaseController {
 		$usertype = Input::get('usertype');
 		$startDate = $date." 00:00:00";
 		$endDate = $date." 23:59:59";
-	
-		$dailyCommission = DB::table('adt_recharge_ledger')->leftjoin('adt_user_details', 'adt_recharge_ledger.rchlgr_fr_id','=', 'adt_user_details.UD_ID_PK')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_recharge_ledger.rchlgr_date',array($startDate,$endDate))->get();
-		//$output = array();
-		return Response::json($dailyCommission);
+		
+		$dailyBussiness = DB::table('adt_user_details')->leftjoin('adt_ledger_report', 'adt_ledger_report.lr_created_by','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_ledger_report.lr_date',array($startDate,$endDate))->get();
+		if($dailyBussiness){
+			foreach($dailyBussiness as $ds){
+				$amount = $ds->lr_debit_amount;
+				$userid = $ds->UD_ID_PK;
+				$usertype = $ds->UD_USER_TYPE;
+				$date = $ds->lr_date;
+				$output[] = array(
+						'Amount' => $amount,
+						'User Id' => $userid,
+						'User type' => $usertype,
+						'Date' => $date,
+				);
+			}
+			
+		}else{
+			$output = array(
+					'status' => 'failure',
+					'message' => 'No results found',
+					
+			);
+		}
+		return Response::json($output);
 	}
+
+	public function postDailyrecharge()
+	{
+		$date = Input::get('date');
+		$usertype = Input::get('usertype');
+		$startDate = $date." 00:00:00";
+		$endDate = $date." 23:59:59";
+	
+		$dailyRecharge = DB::table('adt_recharge_ledger')->leftjoin('adt_user_details', 'adt_recharge_ledger.rchlgr_fr_id','=', 'adt_user_details.UD_ID_PK')->leftjoin('adt_recharge_details', 'adt_recharge_details.rd_created_by','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_recharge_details.rd_created_at',array($startDate,$endDate))->get();
+		
+		if($dailyRecharge){
+			foreach($dailyRecharge as $ds){
+				$userid = $ds->UD_ID_PK;
+				$type = $ds->UD_USER_TYPE;
+				$serviceprovider = $ds->rd_service_provider;
+				$mobile = $ds->UD_USER_MOBILE;
+				$amount = $ds->rd_amount;
+				$sfcommission = $ds->rd_sfcommission;
+				$commission = $ds->rd_commission;
+				$dcommission = $ds->rd_dcommission;
+				$date = $ds->rd_created_at;
+				$rby = $ds->rd_created_type;
+				$rbyid = $ds->rd_created_by;
+				$status = $ds->rd_result;
+				$output[] = array(
+						'user Id' => $userid,
+						'type' => $type,
+						'service provider' => $serviceprovider,
+						'mobile number' => $mobile,
+						'amount' => $amount,
+						'sfcommission' => $sfcommission,
+						'commissiom' => $commission,
+						'dcommission' => $dcommission,
+						'Date' => $date,
+						'By' => $rby,
+						'By ID' => $rbyid,
+						'status' => $status,		
+				);
+			}
+			
+		}else{
+			$output = array(
+					'status' => 'failure',
+					'message' => 'No results found',
+						
+			);
+		}
+		return Response::json($output);
+	}
+	
+	public function postDailypancard()
+	{
+		$date = Input::get('date');
+		$usertype = Input::get('usertype');
+		$startDate = $date." 00:00:00";
+		$endDate = $date." 23:59:59";
+	
+		$dailyPancard = DB::table('adt_pan_49a')->leftjoin('adt_user_details', 'adt_pan_49a.pan_created_by','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_pan_49a.pan_created_at',array($startDate,$endDate))->get();
+		
+		if($dailyPancard){
+			foreach($dailyPancard as $ds){
+				$userid = $ds->UD_USER_ID;
+				$noofcards = Panoffiline::where('pan_created_by','=',$userid)->whereBetween('adt_pan_49a.pan_created_at',array($startDate,$endDate));
+				print_r($noofcards);exit;
+				$usertype = $ds->UD_USER_TYPE;
+				$date = $ds->pan_created_at;
+				
+				$output[] = array(
+						'Numberofpancard' => $noofcards, 
+						'user Id' => $userid,
+						'usertype' => $usertype,
+						'date' => $date,
+						'type' => 'Pancard request',
+				);
+			}
+		}else{
+			$output = array(
+					'status' => 'failure',
+					'message' => 'No results found',
+	
+			);
+		}
+		return Response::json($output);
+	}
+	
+	public function postDailybalancetransfer()
+	{
+		$date = Input::get('date');
+		$usertype = Input::get('usertype');
+		$startDate = $date." 00:00:00";
+		$endDate = $date." 23:59:59";
+	
+		$dailyBaltransfer = DB::table('adt_credit_recharge')->leftjoin('adt_user_details', 'adt_credit_recharge.cr_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_credit_recharge.cr_created_at',array($startDate,$endDate))->get();
+	
+		if($dailyBaltransfer){
+			foreach($dailyBaltransfer as $ds){
+				
+				$date = $ds->cr_created_at;
+				$id = $ds->cr_id_pk;
+				$type = $ds->cr_type;
+				$amountgiven = $ds->cr_amount;
+				$usertype = $ds->UD_USER_TYPE;
+				$userid = $ds->UD_USER_ID;
+				
+				$output[] = array(
+						'date' => $date,
+						'Id' => $id,
+						'type' => $type,
+						'Amount_Given' => $amountgiven,
+						'usertype' => $usertype,
+						'user Id' => $userid,	
+				);
+			}
+		}else{
+			$output = array(
+					'status' => 'failure',
+					'message' => 'No results found',
+			);
+		}
+		return Response::json($output);
+	}
+	
+	public function postDailymoneytransfer()
+	{
+		$date = Input::get('date');
+		$usertype = Input::get('usertype');
+		$startDate = $date." 00:00:00";
+		$endDate = $date." 23:59:59";
+	
+		$dailyMoneytransfer = DB::table('adt_icc_transaction')->leftjoin('adt_user_details', 'adt_icc_transaction.icc_created_by','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_TYPE','=',$usertype)->whereBetween('adt_icc_transaction.icc_createdat',array($startDate,$endDate))->get();
+	print_r($dailyMoneytransfer);exit;
+		if($dailyMoneytransfer){
+			foreach($dailyMoneytransfer as $ds){
+						$id = $ds->icc_tran_id;
+						$cardnumber = $ds->icc_cardno;
+						$transtype = $ds->icc_trantype;
+					/* 	$tfamount = $ds->;
+						$fee = $ds->;
+						$tamount = $ds->;
+						$bid = $ds->;
+						$baccno = $ds->;
+						$regmobno = $ds->;
+						$bbicode = $ds->;
+						$mobile = $ds->; 
+						$remark = $ds->;*/
+						$created = $ds->icc_createdat;
+						$status = $ds->icc_transtatus;
+						$byid = $ds->icc_created_by;
+	
+				$output[] = array(
+						'ID' => $id,
+						'C_Card_Number' => $cardnumber,
+						'Trans_Type' => $transtype,
+						'TF_Amount' => $tfamount,
+						'fee' => $fee,
+						'T_Amount' => $tamount,
+						'B_ID' => $bid,
+						'B_Ac_No' => $baccno,
+						'Reg_Mob_No_Trsf' => $regmobno,
+						'B_B_Icode' => $bbicode,
+						'B_Mobile' => $mobile,
+						'Created' => $created,
+						'remark' => $remark,
+						'Status' => $status,
+						'By_Id' => $byid
+				);
+													
+			}
+		}else{
+			$output = array(
+					'status' => 'failure',
+					'message' => 'No results found',
+			);
+		}
+		return Response::json($output);
+	}
+	
 }
