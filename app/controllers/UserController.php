@@ -116,7 +116,7 @@ class UserController extends BaseController {
 												}
 												else 
 												{
-													return Response::json(array('status' => 'failure', 'message' => 'You Exceed gthe limit for creating State Partner'));
+													return Response::json(array('status' => 'failure', 'message' => 'You Exceed the limit for creating State Partner'));
 												}
 											}
 											
