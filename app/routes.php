@@ -21,5 +21,5 @@ Route::controller('recharge','RechargeController');
 Route::controller('itr','ItrController');
 Route::controller('service','ServiceController');
 Route::controller('ledgerreport','LedgerController');
-
+Route::controller('ledger','LedgerreportController');
 Route::Controller('icash','IcashController');
