@@ -136,7 +136,23 @@ class Commonmodel extends Eloquent implements UserInterface, RemindableInterface
 		}
 	}
 
-
+	public static function fetchRechargedetails($userid)
+	{
+		$RegDetails = DB::table('adt_recharge_details')->leftjoin('adt_user_details', 'adt_recharge_details.rd_created_by','=', 'adt_user_details.UD_USER_ID')->where('adt_recharge_details.rd_created_by','=',$userid)->get();
+		if(count($RegDetails)>0)
+		{
+			$amnt = 0;
+			foreach($RegDetails as $bal)
+			{
+				$amnt = $amnt + $bal->rd_amount;
+			}
+			return $amnt;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 
 	public static function arr($XML)
 	{
