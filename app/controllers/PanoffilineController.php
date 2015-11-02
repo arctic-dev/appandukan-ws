@@ -36,7 +36,7 @@ class PanoffilineController extends BaseController {
 				$usercount=User::select('UD_USER_ID','UD_USER_TYPE')->where('UD_USER_ID','=',$currentUserId)->get();
 				if(count($usercount)>0)
 				{
-					if($usercount[0]->UD_USER_TYPE=='SA')
+					if($usercount[0]->UD_USER_TYPE=='SA'||$usercount[0]->UD_USER_TYPE=='SAS')
 					{
 						$panc=Panoffiline::all();
 						if(count($panc)>0)
@@ -74,106 +74,16 @@ class PanoffilineController extends BaseController {
 							{
 								return Response::json(array('status' => 'failure', 'message' => 'You Din"t Create Any Pan card till Now'));
 							}
-						
-						
-						
+						}
 					}
-					elseif($usercount[0]->UD_USER_TYPE=='SAS')
-					{
-						$panc=Panoffiline::all();
-						if(count($panc)>0)
-						{
-							foreach($panc as $pancc)
-							{
-								$getdetails[]=array
-								(
-								
-										"idPk"=> $pancc->pan_id_pk,
-										"couponNo"=>$pancc->pan_coupon_no,
-										"title"=> $pancc->pan_title,
-										"firstName"=> $pancc->pan_first_name,
-										"middleName"=> $pancc->pan_middle_name,
-										"lastName"=> $pancc->pan_last_name,
-										"nameAbbrv"=> $pancc->pan_name_abbrv,
-										"dob"=> $pancc->pan_dob,
-										"fatherFname"=> $pancc->pan_father_fname,
-										"fatherMname"=> $pancc->pan_father_mname,
-										"fatherLname"=> $pancc->pan_father_lname,
-										"countryCode"=> "".$pancc->pan_country_code."",
-										"areaCode"=> "".$pancc->pan_area_code."",
-										"contactNo"=> $pancc->pan_contact_no,
-										"emailId"=> $pancc->pan_email_id,
-										"createdAt"=> $pancc->pan_created_at,
-										"createdBy"=> $pancc->pan_created_by,
-										"refundStatus"=> $pancc->pan_refund_status,
-										"refundAt"=> $pancc->pan_refund_at,
-										"refundBy"=> $pancc->pan_refund_by,
-								);
-							}
-							return Response::json( $getdetails);
-						}
-						else
-						{
-								return Response::json(array('status' => 'failure', 'message' => 'You Din"t Create Any Pan card till Now'));
-						}
-						
-						
-					}
-					elseif($usercount[0]->UD_USER_TYPE=='FR')
-					{
-						$panc=Panoffiline::where('pan_created_by','=',$usercount[0]->UD_USER_ID)->get();
-						
-						if(count($panc)>0)
-						{
-							foreach($panc as $pancc)
-							{
-								$getdetails[]=array
-								(
-								
-										"idPk"=> $pancc->pan_id_pk,
-										"couponNo"=>$pancc->pan_coupon_no,
-										"title"=> $pancc->pan_title,
-										"firstName"=> $pancc->pan_first_name,
-										"middleName"=> $pancc->pan_middle_name,
-										"lastName"=> $pancc->pan_last_name,
-										"nameAbbrv"=> $pancc->pan_name_abbrv,
-										"dob"=> $pancc->pan_dob,
-										"fatherFname"=> $pancc->pan_father_fname,
-										"fatherMname"=> $pancc->pan_father_mname,
-										"fatherLname"=> $pancc->pan_father_lname,
-										"countryCode"=> "".$pancc->pan_country_code."",
-										"areaCode"=> "".$pancc->pan_area_code."",
-										"contactNo"=> $pancc->pan_contact_no,
-										"emailId"=> $pancc->pan_email_id,
-										"createdAt"=> $pancc->pan_created_at,
-										"createdBy"=> $pancc->pan_created_by,
-										"refundStatus"=> $pancc->pan_refund_status,
-										"refundAt"=> $pancc->pan_refund_at,
-										"refundBy"=> $pancc->pan_refund_by,
-								);
-							}
-							return Response::json($getdetails);
-						}
-						else
-						{
-							return Response::json(array('status' => 'failure', 'message' => 'You Din"t Create Any Pan card till Now'));
-						}
-						
-						
-						return Response::json( $getdetails);
-					}
+					
+					
+					
 					else
 					{
 						return Response::json(array('status' => 'failure', 'message' => 'You can"t Access the Pan Card'));
 					}
-					
-					
-					
-				}
-				else 
-				{
-					return Response::json(array('status' => 'failure', 'message' => 'User ID Does Not Exist'));
-				}	
+
 			}
 			else
 			{
@@ -286,45 +196,106 @@ class PanoffilineController extends BaseController {
 
 	}
 	
-	public function getForm($id)
+	public function getForm($id,$id2)
 	{
 			//$postdata=file_get_contents("php://input");
 			if(!empty($id))
 			{
+				$getlegersub='';
+				$getdetails='';
 				$userid=$id;
-				$check=Panoffiline::where('pan_created_by','=',$userid)->get();
-				if(count($check)>0)
+				$userIdPk=$id2;
+				$check=Panoffiline::where('pan_created_by','=',$userid)->get();			
+				$getsubuserid=User::select('UD_USER_ID')->where('UD_USER_TYPE','=','FRS')->where('UD_PARENT_ID','=',$userIdPk)->get();
+				if(count($getsubuserid)>0)
 				{
-					for($i=0; $i<count($check); $i++)
+					foreach($getsubuserid as $getsubuserids)
 					{
-						echo $check[$i]['idPk'];
+						$getsubuseridss[]=$getsubuserids['UD_USER_ID'];
+					}
+					
+					
+					if(count($getsubuseridss)==1)
+					{
 						
-						$getdetails[]=array
+						$getlegersub=Panoffiline::where('pan_created_by',$getsubuseridss)->get();
+					}
+					elseif(count($getsubuseridss)>1)
+					{
+						
+						$getlegersub=Panoffiline::whereBetween('pan_created_by',$getsubuseridss)->get();
+						
+					}
+					
+						
+				}
+			
+				if(count($check)>0||$getsubuseridss!='')
+				{
+					if(count($check)>0)
+					{
+						for($i=0; $i<count($check); $i++)
+						{
+							$getdetails[]=array
+							(
+							
+								"idPk"=> $check[$i]->pan_id_pk,
+								"couponNo"=>$check[$i]->pan_coupon_no,
+								"title"=> $check[$i]->pan_title,
+								"firstName"=> $check[$i]->pan_first_name,
+								"middleName"=> $check[$i]->pan_middle_name,
+								"lastName"=> $check[$i]->pan_last_name,
+								"nameAbbrv"=> $check[$i]->pan_name_abbrv,
+								"dob"=> $check[$i]->pan_dob,
+								"fatherFname"=> $check[$i]->pan_father_fname,
+								"fatherMname"=> $check[$i]->pan_father_mname,
+								"fatherLname"=> $check[$i]->pan_father_lname,
+								"countryCode"=> "".$check[$i]->pan_country_code."",
+								"areaCode"=> "".$check[$i]->pan_area_code."",
+								"contactNo"=> $check[$i]->pan_contact_no,
+								"emailId"=> $check[$i]->pan_email_id,
+								"createdAt"=> $check[$i]->pan_created_at,
+								"createdBy"=> $check[$i]->pan_created_by,
+								"refundStatus"=> $check[$i]->pan_refund_status,
+								"refundAt"=> $check[$i]->pan_refund_at,
+								"refundBy"=> $check[$i]->pan_refund_by,
+							);
+						}
+					}
+					
+					if(count($getlegersub)>0)
+					{
+						for($i=0; $i<count($getlegersub); $i++)
+						{
+							
+						$getdetailssubuser[]=array
 						(
 						
-							"idPk"=> $check[$i]->pan_id_pk,
-							"couponNo"=>$check[$i]->pan_coupon_no,
-							"title"=> $check[$i]->pan_title,
-							"firstName"=> $check[$i]->pan_first_name,
-							"middleName"=> $check[$i]->pan_middle_name,
-							"lastName"=> $check[$i]->pan_last_name,
-							"nameAbbrv"=> $check[$i]->pan_name_abbrv,
-							"dob"=> $check[$i]->pan_dob,
-							"fatherFname"=> $check[$i]->pan_father_fname,
-							"fatherMname"=> $check[$i]->pan_father_mname,
-							"fatherLname"=> $check[$i]->pan_father_lname,
-							"countryCode"=> "".$check[$i]->pan_country_code."",
-							"areaCode"=> "".$check[$i]->pan_area_code."",
-							"contactNo"=> $check[$i]->pan_contact_no,
-							"emailId"=> $check[$i]->pan_email_id,
-							"createdAt"=> $check[$i]->pan_created_at,
-							"createdBy"=> $check[$i]->pan_created_by,
-							"refundStatus"=> $check[$i]->pan_refund_status,
-							"refundAt"=> $check[$i]->pan_refund_at,
-							"refundBy"=> $check[$i]->pan_refund_by,
-						);
+								"idPk"=> $getlegersub[$i]->pan_id_pk,
+								"couponNo"=>$getlegersub[$i]->pan_coupon_no,
+								"title"=> $getlegersub[$i]->pan_title,
+								"firstName"=> $getlegersub[$i]->pan_first_name,
+								"middleName"=> $getlegersub[$i]->pan_middle_name,
+								"lastName"=> $getlegersub[$i]->pan_last_name,
+								"nameAbbrv"=> $getlegersub[$i]->pan_name_abbrv,
+								"dob"=> $getlegersub[$i]->pan_dob,
+								"fatherFname"=> $getlegersub[$i]->pan_father_fname,
+								"fatherMname"=> $getlegersub[$i]->pan_father_mname,
+								"fatherLname"=> $getlegersub[$i]->pan_father_lname,
+										"countryCode"=> "".$getlegersub[$i]->pan_country_code."",
+												"areaCode"=> "".$getlegersub[$i]->pan_area_code."",
+												"contactNo"=> $getlegersub[$i]->pan_contact_no,
+												"emailId"=> $getlegersub[$i]->pan_email_id,
+												"createdAt"=> $getlegersub[$i]->pan_created_at,
+												"createdBy"=> $getlegersub[$i]->pan_created_by,
+												"refundStatus"=> $getlegersub[$i]->pan_refund_status,
+												"refundAt"=> $getlegersub[$i]->pan_refund_at,
+												"refundBy"=> $getlegersub[$i]->pan_refund_by,
+										);
+						}
 					}
-					return Response::json(array('status' => 'success', 'panForms' => $getdetails, 'message' => 'User PAN forms returned successfully'));
+					
+					return Response::json(array('status' => 'success', 'mainuser' => $getdetails, 'subuser' => $getdetailssubuser, 'message' => 'User PAN forms returned successfully'));
 				}
 				else
 				{

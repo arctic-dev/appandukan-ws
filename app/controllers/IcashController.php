@@ -445,6 +445,24 @@ $input=Icash::where('icc_usercardno',Input::get('cardno'))->get();
 
 	public function postTransaction()
 	{
+		$usermain=User::where('UD_USER_ID',Input::get('createdby'))->get();
+		if(count($usermain)>0 && ($usermain[0]->UD_USER_TYPE=="FR"))
+		{
+			$Userfinance=Userfinance::where('ufin_user_id',Input::get('createdby'))->pluck('ufin_main_balance');
+		}
+		elseif(count($usermain)>0 && ($usermain[0]->UD_USER_TYPE=="FRS"))
+		{
+			$userparent=User::where('UD_ID_PK',$usermain[0]->UD_PARENT_ID)->get();
+			if(count($userparent)>0)
+			{
+		
+				$Userfinance=Userfinance::where('ufin_user_id',$userparent[0]->UD_USER_ID)->pluck('ufin_main_balance');
+				}
+				else
+				{
+					$Userfinance="";
+				}
+		}
 		$array=array(
 			"icc_cardno"=>Input::get('cardno'),
 			"icc_trantype"=>Input::get('trantype'),
@@ -461,7 +479,20 @@ $input=Icash::where('icc_usercardno',Input::get('cardno'))->get();
 			"icc_securitykey"=>Input::get('security_key')
 			);
 		$newtopup=new Icashtransaction;
+
 		$newtop=$newtopup->create($array);
+		$comission=array
+							(
+									'lr_date'=>date('Y-m-d'),
+									'lr_trans_type'=>'Debited',
+									'lr_comment'=>'Icashcard Transaction by cardno'.Input::get('cardno'),
+									'lr_debit_amount'=>Input::get('tranamount'),
+									'lr_post_balance'=>$Userfinance,
+									'lr_created_by'=>Input::get('createdby'),
+									'lr_prod_code'=>'',
+							);
+							
+							$getlastinseertedcomid=Comission::insertGetId($comission);
 	}
 	public function postTranstatus()
 	{
@@ -541,7 +572,22 @@ return Response::json($response);
 
 public function getTopupcard($name)
 {
+	$usernew=User::where('UD_USER_ID',$name)->get();
+	if(count($usernew)>0)
+	{
+	if($usernew[0]->UD_USER_TYPE=="FR")
+	{
 	$user=Userfinance::where('ufin_user_id',$name)->select('ufin_icash_balance')->get();
+		
+	}
+	elseif($usernew[0]->UD_USER_TYPE=="FRS")
+	{
+		$userparent=User::where('UD_ID_PK',$usernew[0]->UD_PARENT_ID)->get();
+	
+		$user=Userfinance::where('ufin_user_id',$userparent[0]->UD_USER_ID)->select('ufin_icash_balance')->get();
+	
+	}
+
 	//print_r($user); exit;
 
 	if(count($user)>0)
@@ -562,10 +608,24 @@ public function getTopupcard($name)
 			"status"=>"failure"
 			);
 	}
+}else
+{
+	$response=array(
+			"message"=>"User not found",
+			"status"=>"failure"
+			);
+}
 	return Response::json($response);
+
 }
 public function getTopupval($name,$val)
 {
+	$user=User::where('UD_USER_ID',$name)->get();
+	if(count($user)>0)
+	{
+	if($user[0]->UD_USER_TYPE=="FR")
+	{
+	
 	$user=Userfinance::where('ufin_user_id',$name)->get();
 	//print_r($user);exit;
 	
@@ -584,6 +644,18 @@ public function getTopupval($name,$val)
 		'ufin_icash_credited'=>$users->ufin_icash_credited_val+$val,
 		);	
 		$user=Userfinance::where('ufin_user_id',$name)->update($arr);
+		$comission=array
+							(
+									'lr_date'=>date('Y-m-d'),
+									'lr_trans_type'=>'Debited',
+									'lr_comment'=>'Debited For IMPS wallet',
+									'lr_debit_amount'=>$val,
+									'lr_post_balance'=>$users->ufin_main_balance-$val,
+									'lr_created_by'=>$name,
+									'lr_prod_code'=>'',
+							);
+							
+							$getlastinseertedcomid=Comission::insertGetId($comission);
 	
 		$response=array(
 			"cardno"=>"balance added",
@@ -598,10 +670,91 @@ public function getTopupval($name,$val)
 			);
 	}
 }
+}
+else
+{
+$parentuser=User::where('UD_ID_PK',$user[0]->UD_PARENT_ID)->get();
+if(count($parentuser)>0)
+{
+$user=Userfinance::where('ufin_user_id',$parentuser[0]->UD_USER_ID)->get();
+	//print_r($user);exit;
+	
+	//echo $newval;
+	if(count($user)>0)
+	{
+		foreach ($user as $users) {
+			# code...
+		}
+		if($users->ufin_main_balance>$val)
+		{
+		$arr=array
+		(
+		'ufin_main_balance'=>$users->ufin_main_balance-$val,
+		'ufin_icash_balance'=>$users->ufin_icash_balance+$val,
+		'ufin_icash_credited'=>$users->ufin_icash_credited_val+$val,
+		);	
+		$user=Userfinance::where('ufin_user_id',$parentuser[0]->UD_USER_ID)->update($arr);
+		$comission=array
+							(
+									'lr_date'=>date('Y-m-d'),
+									'lr_trans_type'=>'Debited',
+									'lr_comment'=>'Debited For IMPS wallet',
+									'lr_debit_amount'=>$val,
+									'lr_post_balance'=>$users->ufin_main_balance-$val,
+									'lr_created_by'=>$name,
+									'lr_prod_code'=>'',
+							);
+							
+							$getlastinseertedcomid=Comission::insertGetId($comission);
+							
+	
+		$response=array(
+			"cardno"=>"balance added",
+			"status"=>"success"
+			);
+	}
+	else
+	{
+		$response=array(
+			"message"=>"Balance is low",
+			"status"=>"failure"
+			);
+	}
+}
+else
+{
+$response=array(
+			"message"=>"User Not found",
+			"status"=>"failure"
+			);
+}
+}
+else
+{
+$response=array(
+			"message"=>"User Not found",
+			"status"=>"failure"
+			);
+}
+}
+}
+else
+{
+$response=array(
+			"message"=>"User Not found",
+			"status"=>"failure"
+			);
+}
 	return Response::json($response);
 }
 public function getTransfer($name,$val)
 {
+	$usernew=User::where('UD_USER_ID',$name)->get();
+	if(count($usernew)>0)
+	{
+	if($usernew[0]->UD_USER_TYPE=="FR")
+	{
+
 	$user=Userfinance::where('ufin_user_id',$name)->get();
 	//print_r($user);exit;
 	
@@ -619,6 +772,18 @@ public function getTransfer($name,$val)
 		'ufin_icash_used'=>$users->ufin_icash_used+$val,
 		);	
 		$user=Userfinance::where('ufin_user_id',$name)->update($arr);
+		$comission=array
+							(
+									'lr_date'=>date('Y-m-d'),
+									'lr_trans_type'=>'Debited',
+									'lr_comment'=>'Debited For Icash Transaction',
+									'lr_debit_amount'=>$val,
+									'lr_post_balance'=>$users->ufin_icash_balance-$val,
+									'lr_created_by'=>$name,
+									'lr_prod_code'=>'',
+							);
+							
+							$getlastinseertedcomid=Comission::insertGetId($comission);
 	
 		$response=array(
 			"cardno"=>" balance remitted",
@@ -633,7 +798,93 @@ public function getTransfer($name,$val)
 			);
 	}
 }
+else
+{
+$response=array(
+			"message"=>"User not Found",
+			"status"=>"failure"
+			);	
+}
+}
+else
+{
+	$parentuser=User::where('UD_ID_PK',$usernew[0]->UD_PARENT_ID)->get();
+if(count($parentuser)>0)
+{
+$user=Userfinance::where('ufin_user_id',$parentuser[0]->UD_USER_ID)->get();
+	//print_r($user);exit;
+	
+	//echo $newval;
+	if(count($user)>0)
+	{
+		foreach ($user as $users) {
+			# code...
+		}
+		if($users->ufin_icash_balance>$val)
+		{
+		$arr=array
+		(
+		'ufin_icash_balance'=>$users->ufin_icash_balance-$val,
+		'ufin_icash_used'=>$users->ufin_icash_used+$val,
+		);	
+		$user=Userfinance::where('ufin_user_id',$parentuser[0]->UD_USER_ID)->update($arr);
+
+		$user=Userfinance::where('ufin_user_id',$name)->update($arr);
+		$comission=array
+							(
+									'lr_date'=>date('Y-m-d'),
+									'lr_trans_type'=>'Debited',
+									'lr_comment'=>'Debited For Icash Transaction',
+									'lr_debit_amount'=>$val,
+									'lr_post_balance'=>$users->ufin_icash_balance-$val,
+									'lr_created_by'=>$name,
+									'lr_prod_code'=>'',
+							);
+							
+							$getlastinseertedcomid=Comission::insertGetId($comission);
+	
+		$response=array(
+			"cardno"=>" balance remitted",
+			"status"=>"success"
+			);
+	}
+	else
+	{
+		$response=array(
+			"message"=>"Balance is low",
+			"status"=>"failure"
+			);
+	}
+}
+else
+{
+$response=array(
+			"message"=>"User Not found",
+			"status"=>"failure"
+			);
+}
+}
+else
+{
+$response=array(
+			"message"=>"User Not found",
+			"status"=>"failure"
+			);
+}
+}
+
+}
+
+else
+{
+$response=array(
+			"message"=>"User not Found",
+			"status"=>"failure"
+			);
+}
 	return Response::json($response);
+
+
 }
 
 public function getBalance($balance)

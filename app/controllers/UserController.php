@@ -52,7 +52,16 @@ class UserController extends BaseController {
 			{
 				if(empty($lockbalance))
 				{
-					$lockbalance=0;
+					$checkbalancedetection=Balancedetection::where('bal_usr_roll','=',$userType)->get();
+					if(count($checkbalancedetection)>0)
+					{
+						$lockbalance=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('bal_detn_amt');
+					}
+					else 
+					{
+						$lockbalance=0;
+					}
+					
 				}
 				
 				if(empty($mainbalance))
@@ -94,8 +103,74 @@ class UserController extends BaseController {
 										{
 											if($userType!='SP')
 											{
-												$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->get());
-												$currentcountcheck=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
+												$getusercount=count(User::where('UD_USER_TYPE','=',$userType)->get());
+												$checkstatedetailsf=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
+												$checkindiviudalcount=User::where('UD_ID_PK','=',$parentIdPk)->pluck('UD_USER_CREATE_COUNT');
+												
+												
+												
+												if($getusercount<=$checkstatedetailsf)
+												{
+													if($userType=='SAS')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','SA')->pluck('user_reg_count');
+													}
+													elseif($userType=='SP')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','SA')->pluck('user_reg_count');
+													}
+													elseif($userType=='SPS')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','SP')->pluck('user_reg_count');
+													}
+													elseif($userType=='SD')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','SP')->pluck('user_reg_count');
+													}
+													elseif($userType=='SDS')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','SD')->pluck('user_reg_count');
+													}
+													elseif($userType=='D')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','SD')->pluck('user_reg_count');
+														
+													}
+													elseif($userType=='DS')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','D')->pluck('user_reg_count');
+													}
+													elseif($userType=='FR')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','D')->pluck('user_reg_count');
+													}
+													elseif($userType=='FRS')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','FR')->pluck('user_reg_count');
+													}
+													elseif($userType=='SFR')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','FR')->pluck('user_reg_count');
+													}
+													elseif($userType=='SFRS')
+													{
+														$currentcountcheck=Balancedetection::where('bal_usr_roll','=','FR')->pluck('user_reg_count');
+													}
+													
+													$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->get());
+													
+												}
+												elseif($getusercount<=$checkindiviudalcount)
+												{
+													
+													$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->get());
+													$currentcountcheck=$checkindiviudalcount;
+													
+												}
+												else
+												{
+													return Response::json(array('status' => 'failure', 'message' => 'You Reached Limit for creating Sub Role'));
+												}
 											}
 											else
 											{
@@ -107,12 +182,15 @@ class UserController extends BaseController {
 													$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->where('UD_USER_STATE','=',$userState)->get());
 													$currentcountcheck=State::where('adt_state_name','=',$userState)->pluck('adt_state_count');
 													$statpatuserid=State::where('adt_state_name','=',$userState)->pluck('adt_state_code');
+													
 												}
 												elseif(count($checkstatedetailsf)<=$getusercount)
 												{
+													
 													$usercountdetails=count(User::where('UD_USER_TYPE','=',$userType)->where('UD_USER_STATE','=',$userState)->get());
 													$currentcountcheck=Balancedetection::where('bal_usr_roll','=',$userType)->pluck('user_reg_count');
 													$statpatuserid=State::where('adt_state_name','=',$userState)->pluck('adt_state_code');
+													
 												}
 												else 
 												{
@@ -120,7 +198,7 @@ class UserController extends BaseController {
 												}
 											}
 											
-											if($usercountdetails>=$currentcountcheck)
+											if($usercountdetails>$currentcountcheck)
 											{
 												return Response::json(array('status' => 'failure', 'message' => 'You Reached Limit for creating Sub Role'));
 											}
@@ -177,8 +255,9 @@ class UserController extends BaseController {
 													
 												}
 												
-												$userkey=md5($userType.$userName.str_random(2));
-												$userkeysend=$userType.$userName.str_random(2);
+												$usernameforpass = preg_replace('/\s+/', '', $userName);
+												$userkeysend=$userType.$usernameforpass.str_random(2);
+												$userkey=md5($userkeysend);
 												$input=array
 												(
 											
@@ -201,6 +280,8 @@ class UserController extends BaseController {
 													'UD_USER_CREATE_COUNT'=>$usercount,
 														
 												);
+												
+												
 												
 												$userid=DB::table('adt_user_details')->insertGetId($input);
 												
@@ -352,6 +433,7 @@ class UserController extends BaseController {
 			$userId=Input::get('userId');
 			$userPassword=md5(Input::get('userKey'));
 			$logincheck=User::where('UD_USER_ID',$userId)->where('UD_USER_KEY',$userPassword)->get();
+			
 			if(count($logincheck)>0)
 			{
 				$userdetails=User::where('UD_USER_ID',$userId)->where('UD_USER_KEY',$userPassword)->get();
@@ -683,6 +765,8 @@ class UserController extends BaseController {
 				foreach($balancefromuser as $balancefromusers)
 				{
 					$formuserbalance=$balancefromusers->ufin_main_balance;
+					
+					$formusercurrenttotalcredited=$balancefromusers->ufin_total_credited;
 				}
 				
 				if($formuserbalance>$amount)
@@ -695,6 +779,8 @@ class UserController extends BaseController {
 							$btcurrentmainbal=$balancetouser->ufin_main_balance;
 							$btcurrenttotalcredited=$balancetouser->ufin_total_credited;
 						}
+						
+						
 						
 						if($feePerc>0)
 						{
@@ -713,8 +799,20 @@ class UserController extends BaseController {
 							'ufin_main_balance'=>$btcurrentmainbal+$amount,
 							'ufin_total_credited'=>$btcurrenttotalcredited+$amount,
 						);
-						//print_r($updateuserbalance);
+						
 						Userfinance::where('ufin_user_id','=',$userId)->update($updateuserbalance);
+						
+						$newbalupdatecr=0;
+						$newbalupdatecr= $formuserbalance-$amount;
+						
+						$updateuserbalance=array
+						(
+								'ufin_main_balance'=>$newbalupdatecr,								
+						);
+						
+						
+						
+						Userfinance::where('ufin_user_id','=',$currentUserId)->update($updateuserbalance);
 						
 						$creditcharge=array
 						(
@@ -727,6 +825,43 @@ class UserController extends BaseController {
 							'cr_created_by'=>$currentUserId,
 							'cr_created_at'=>$currentdate,
 						);
+						
+						$getcurrentuserid=Userfinance::where('ufin_user_id','=',$currentUserId)->pluck('ufin_main_balance');
+						
+						$newbalcenaces=0;
+						$newbalcenaces= $formuserbalance-$amount;
+						
+						$ledgercreditdb=array
+						(
+								'lr_date'=>$currentdate,
+								'lr_trans_type'=>'DB',
+								'lr_comment'=>'Balance Transfer',
+								'lr_debit_amount'=>$amount,
+								'lr_post_balance'=>$newbalcenaces,
+								'lr_created_by'=>$currentUserId,
+						);
+						
+						
+						
+						
+						$addnewledger= new Ledgerreport;
+						$addnewledger->create($ledgercreditdb);
+						
+						$newbalcenaces1=0;
+						$newbalcenaces1= $btcurrentmainbal+$amount;
+						
+						$ledgercreditcr=array
+						(
+								'lr_date'=>$currentdate,
+								'lr_trans_type'=>'CR',
+								'lr_comment'=>"Balance Transfer",
+								'lr_credit_amount'=>$amount,
+								'lr_post_balance'=>$newbalcenaces1,
+								'lr_created_by'=>$currentUserId,
+						);
+						
+						$addnewledger= new Ledgerreport;
+						$addnewledger->create($ledgercreditcr);
 						
 						$creditchargeinsert=new Usercreditrecharge;
 						$creditchargeinsert->create($creditcharge);
@@ -803,14 +938,24 @@ class UserController extends BaseController {
 			$feePerc=Input::get('feePerc');
 			
 			$currentbalance=Userfinance::where('ufin_user_id','=',$userId)->pluck('ufin_main_balance');
-			if($currentbalance>$amount)
+			$lockbalance=Userfinance::where('ufin_user_id','=',$userId)->pluck('ufin_lock_balance');
+		
+			
+			if($currentbalance>$lockbalance)
 			{
-				$balanceupdt=array
-				(
-						'ufin_lock_balance'=>$amount,
-				);
-				Userfinance::where('ufin_user_id','=',$userId)->update($balanceupdt);
-				return Response::json(array('status' => 'success', 'message' => 'Your Lock Balance Updated Successfully'));
+				if($amount<$currentbalance)
+				{
+					$balanceupdt=array
+					(
+							'ufin_lock_balance'=>$amount,
+					);
+					Userfinance::where('ufin_user_id','=',$userId)->update($balanceupdt);
+					return Response::json(array('status' => 'success', 'message' => 'Your Lock Balance Updated Successfully'));
+				}
+				else
+				{
+					return Response::json(array('status' => 'failure', 'message' => 'Yor main balance is too low . Your Lock balance cannot be updated'));
+				}
 			}
 			else
 			{
@@ -1122,8 +1267,86 @@ class UserController extends BaseController {
 	}
 	
 	
+	public function postBalanceamoutupdate()
+	{
+		$postdata=file_get_contents("php://input");
+		if(!empty($postdata))
+		{
+			$userType=Input::get('userType');
+			$amount=Input::get('amount');
+			if(!empty($userType))
+			{
+				$checkbalancedetection=Balancedetection::where('bal_usr_roll','=',$userType)->get();
+				if(count($checkbalancedetection)>0)
+				{
+					$updateamout=array
+					(
+						'bal_detn_amt'=>$amount,
+					);
+				
+					Balancedetection::where('bal_usr_roll','=',$userType)->update($updateamout);
+					return Response::json(array('status' => 'failure', 'message' => 'Lock Balance Updated Successfully'));
+				}
+				else
+				{
+					return Response::json(array('status' => 'failure', 'message' => 'There is No User Type To search'));
+				}
+			}
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'There is No User Type To search'));
+			}
+		}
+	
+	}
 	
 	
+	public function postBalanceusercountupdate()
+	{
+		$postdata=file_get_contents("php://input");
+		if(!empty($postdata))
+		{
+			$userType=Input::get('userType');
+			$userCount=Input::get('userCount');
+				
+			if($userType)
+			{
+				$checkbalancedetection=Balancedetection::where('bal_usr_roll','=',$userType)->get();
+				if(count($checkbalancedetection)>0)
+				{
+					$updateamout=array
+					(
+							'user_reg_count'=>$userCount,
+					);
+					Balancedetection::where('bal_usr_roll','=',$userType)->update($updateamout);
+					return Response::json(array('status' => 'failure', 'message' => 'User Count Updated Successfully'));
+				}
+				else
+				{
+					return Response::json(array('status' => 'failure', 'message' => 'There is No User Type To search'));
+				}
+			}
+			else
+			{
+				return Response::json(array('status' => 'failure', 'message' => 'There is No User Type To search'));
+			}
+		}
 	
+	}
+	
+	
+	public function getUserlimit()
+	{
+		$staesp=Balancedetection::all();
+		if(count($staesp)>0)
+		{
+			return Response::json($staesp);
+		}
+		else
+		{
+			return Response::json(array('status' => 'failure', 'message' => 'There is No state in State Table'));
+		}
+	
+	}
 	
 }
