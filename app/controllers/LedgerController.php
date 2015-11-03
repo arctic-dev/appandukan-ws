@@ -165,6 +165,51 @@ class LedgerController extends BaseController {
 				);
 			}
 		}
+		elseif($userType == "SPS")
+		{
+			$SPbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_ID_PK','=',$userIDPK)->get();
+			
+			$spartBalance=0;
+			if($SPbalance)
+			{
+				foreach($SPbalance as $sp)
+				{
+					$spaBalance = $sp->ufin_main_balance;
+					$parentid = $sp->UD_PARENT_ID;
+				}
+				$Daccounts = count(User::where('UD_PARENT_ID','=',$parentid)->get());
+				$SDbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_finance.ufin_user_id_pk_fk','=',$parentid)->get();
+
+				$disbal=0;
+				if($SDbalance)
+				{
+					foreach($SDbalance as $frs)
+					{
+						$disbal = $disbal + $frs->ufin_main_balance;
+					}
+					$output = array(
+							'Statepartner_Balance' => $spaBalance,
+							'Distributor_accounts' => $Daccounts,
+							'Distributor_balance' => $disbal,
+					);
+				}
+				else
+				{
+					$output = array(
+							'Statepartner_Balance' => $spaBalance,
+							'Distributor_accounts' => $Daccounts,
+							'Distributor_balance' => '0',
+					);
+				}
+			}
+			else
+			{
+				$output = array(
+						'status' => 'failure',
+						'message' => 'No results found',
+				);
+			}
+		}
 		elseif($userType == "SD")
 		{
 			$SDbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
@@ -177,6 +222,50 @@ class LedgerController extends BaseController {
 				}
 				$Daccounts = count(User::where('UD_PARENT_ID','=',$userIDPK)->get());
 				$Disbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_PARENT_ID','=',$userIDPK)->get();
+				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
+		
+				$disbal=0;
+				if($Disbalance)
+				{
+					foreach($Disbalance as $frs)
+					{
+						$disbal = $disbal + $frs->ufin_main_balance;
+					}
+					$output = array(
+							'Super_Distributer_Balance' => $sdiBalance,
+							'Distributor_accounts' => $Daccounts,
+							'Distributor_balance' => $disbal,
+					);
+				}
+				else
+				{
+					$output = array(
+							'status' => 'failure',
+							'message' => 'No results found',
+					);
+				}
+			}
+			else
+			{
+				$output = array(
+						'status' => 'failure',
+						'message' => 'No results found',
+				);
+			}
+		}
+		elseif($userType == "SDS")
+		{
+			$SDbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
+			$sdiBalance=0;
+			if($SDbalance)
+			{
+				foreach($SDbalance as $sp)
+				{
+					$sdiBalance = $sp->ufin_main_balance;
+					$parentid = $sp->UD_PARENT_ID;
+				}
+				$Daccounts = count(User::where('UD_PARENT_ID','=',$parentid)->get());
+				$Disbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_finance.ufin_user_id_pk_fk','=',$parentid)->get();
 				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
 		
 				$disbal=0;
@@ -250,7 +339,50 @@ class LedgerController extends BaseController {
 				);
 			}
 		}
-		elseif( ($userType == "FR") || ($userType == "FRS"))
+		elseif($userType == "DS")
+		{
+			$SDbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
+			$sdiBalance=0;
+			if($SDbalance)
+			{
+				foreach($SDbalance as $sp)
+				{
+					$sdiBalance = $sp->ufin_main_balance;
+					$parentid = $sp->UD_PARENT_ID;
+				}
+				$Daccounts = count(User::where('UD_PARENT_ID','=',$parentid)->get());
+				$Disbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_finance.ufin_user_id','=',$parentid)->get();
+				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
+				$disbal=0;
+				if($Disbalance)
+				{
+					foreach($Disbalance as $frs)
+					{
+						$disbal = $disbal + $frs->ufin_main_balance;
+					}
+					$output = array(
+							'Distributer_Balance' => $sdiBalance,
+							'Franchise_accounts' => $Daccounts,
+							'Franchise_balance' => $disbal,
+					);
+				}
+				else
+				{
+					$output = array(
+							'status' => 'failure',
+							'message' => 'No results found',
+					);
+				}
+			}
+			else
+			{
+				$output = array(
+						'status' => 'failure',
+						'message' => 'No results found',
+				);
+			}
+		}
+		elseif($userType == "FR")
 		{
 			$FRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
 			$fraBalance=0;
@@ -297,7 +429,81 @@ class LedgerController extends BaseController {
 			}
 			
 		}
-		elseif( ($userType == "SFR") || ($userType == "SFRS"))
+		elseif($userType == "FRS")
+		{
+			$FRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
+			$fraBalance=0;
+			if($FRbalance)
+			{
+				foreach($FRbalance as $fr)
+				{
+					$fraBalance = $fr->ufin_main_balance;
+					$icashBalance = $fr->ufin_icash_balance;
+					$parentid = $sp->UD_PARENT_ID;
+				}
+				$FRSaccounts = count(User::where('UD_PARENT_ID','=',$parentid)->get());
+				$SFRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_finance.ufin_user_id','=',$parentid)->get();
+				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
+		
+				$sfrbal=0;
+				if($FRbalance)
+				{
+					foreach($SFRbalance as $frs)
+					{
+						$sfrbal = $sfrbal + $frs->ufin_main_balance;
+					}
+					$output = array(
+							'Franchise_Balance' => $fraBalance,
+							'icash_Balance' => $icashBalance,
+							'Sub_franchise_accounts' => $FRSaccounts,
+							'Sub_franchise_balance' => $sfrbal,
+							'Total_recharge_amount' => $FRtotalregamount,
+					);
+				}
+				else
+				{
+					$output = array(
+							'status' => 'failure',
+							'message' => 'No results found',
+					);
+				}
+			}
+			else
+			{
+				$output = array(
+						'status' => 'failure',
+						'message' => 'No results found',
+				);
+			}
+				
+		}
+		elseif($userType == "SFR")
+		{
+			$FRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
+			$fraBalance=0;
+			if($FRbalance)
+			{
+				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
+				foreach($FRbalance as $fr)
+				{
+					$fraBalance = $fr->ufin_main_balance;
+					$icashBalance = $fr->ufin_icash_balance;
+				}
+				$output = array(
+						'Franchise_Balance' => $fraBalance,
+						'icash_Balance' => $icashBalance,
+						'Total_recharge_amount' => $FRtotalregamount,
+				);
+			}
+			else
+			{
+				$output = array(
+						'status' => 'failure',
+						'message' => 'No results found',
+				);
+			}
+		}
+		elseif($userType == "SFRS")
 		{
 			$FRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_details.UD_USER_ID','=',$userID)->get();
 			$fraBalance=0;
@@ -770,7 +976,6 @@ class LedgerController extends BaseController {
 			}
 		}elseif(($userType == 'SFR') || ($userType == 'SFRS')){
 			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_sfr_id','=',$userid)->get();
-			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_fr_id','=',$userid)->get();
 			foreach($rechagedate as $rd)
 			{
 				$rg_strdate[] = Commonmodel::timeconversion($rd->lr_date);
@@ -811,7 +1016,6 @@ class LedgerController extends BaseController {
 			}
 		}elseif(($userType == 'SD') || ($userType == 'SDS')){
 			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_sd_id','=',$userid)->get();
-			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_fr_id','=',$userid)->get();
 			foreach($rechagedate as $rd)
 			{
 				$rg_strdate[] = Commonmodel::timeconversion($rd->lr_date);
@@ -852,7 +1056,6 @@ class LedgerController extends BaseController {
 			}
 		}elseif(($userType == 'D') || ($userType == 'DS') ){
 			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_d_id','=',$userid)->get();
-			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_fr_id','=',$userid)->get();
 			foreach($rechagedate as $rd)
 			{
 				$rg_strdate[] = Commonmodel::timeconversion($rd->lr_date);
@@ -893,7 +1096,6 @@ class LedgerController extends BaseController {
 			}
 		}elseif(($userType == 'SP') || ($userType == 'SPS')){
 			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_sp_id','=',$userid)->get();
-			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->where('adt_recharge_ledger.rchlgr_fr_id','=',$userid)->get();
 			foreach($rechagedate as $rd)
 			{
 				$rg_strdate[] = Commonmodel::timeconversion($rd->lr_date);
@@ -933,7 +1135,6 @@ class LedgerController extends BaseController {
 				);
 			}
 		}elseif(($userType == 'SA') || ($userType == 'SAS')){
-			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->get();
 			$rechagedate = DB::table('adt_recharge_ledger')->leftjoin('adt_ledger_report', 'adt_recharge_ledger.rchlgr_lr_id','=', 'adt_ledger_report.lr_id_pk')->select('adt_ledger_report.lr_date','adt_ledger_report.lr_debit_amount')->get();
 			foreach($rechagedate as $rd)
 			{
