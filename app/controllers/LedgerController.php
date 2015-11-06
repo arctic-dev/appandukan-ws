@@ -41,13 +41,13 @@ class LedgerController extends BaseController {
 			$endDate = date('Y-m-d')." 23:59:59";
 			
 			//recharge stats
-			$successRechargeRecords = LedgerReport::where('lr_comment','=','Recharge')->where('lr_status','=','success')->whereBetween('lr_date',array($startDate,$endDate))->get();
+			$successRechargeRecords = Ledgerreport::where('lr_comment','=','Recharge')->where('lr_status','=','success')->whereBetween('lr_date',array($startDate,$endDate))->get();
 			foreach($successRechargeRecords as $srr)
 			{
 				$successRecAmount = $successRecAmount + $srr->lr_debit_amount;
 				
 			}
-			$failureRechargeRecords = LedgerReport::where('lr_comment','=','Recharge')->where('lr_status','=','failure')->whereBetween('lr_date',array($startDate,$endDate))->get();
+			$failureRechargeRecords = Ledgerreport::where('lr_comment','=','Recharge')->where('lr_status','=','failure')->whereBetween('lr_date',array($startDate,$endDate))->get();
 			foreach($failureRechargeRecords as $srr)
 			{
 				$failureRecAmount = $failureRecAmount + $srr->lr_debit_amount;
@@ -439,14 +439,14 @@ class LedgerController extends BaseController {
 				{
 					$fraBalance = $fr->ufin_main_balance;
 					$icashBalance = $fr->ufin_icash_balance;
-					$parentid = $sp->UD_PARENT_ID;
+					$parentid = $fr->UD_PARENT_ID;
 				}
 				$FRSaccounts = count(User::where('UD_PARENT_ID','=',$parentid)->get());
 				$SFRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_finance.ufin_user_id','=',$parentid)->get();
 				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
 		
 				$sfrbal=0;
-				if($FRbalance)
+				if($SFRbalance)
 				{
 					foreach($SFRbalance as $frs)
 					{
@@ -509,17 +509,39 @@ class LedgerController extends BaseController {
 			$fraBalance=0;
 			if($FRbalance)
 			{
-				$FRtotalregamount = Commonmodel::fetchRechargedetails($userID);
 				foreach($FRbalance as $fr)
-				{
-					$fraBalance = $fr->ufin_main_balance;
-					$icashBalance = $fr->ufin_icash_balance;
-				}
-				$output = array(
-						'Franchise_Balance' => $fraBalance,
-						'icash_Balance' => $icashBalance,
-						'Total_recharge_amount' => $FRtotalregamount,
-				);
+					{
+						$fraBalance = $fr->ufin_main_balance;
+						$icashBalance = $fr->ufin_icash_balance;
+						$parentid = $fr->UD_PARENT_ID;
+					}
+					$parentIDname = User::where('UD_ID_PK','=',$parentid)->get();
+					foreach($parentIDname as $prntname){
+						$parent_name = $prntname->UD_USER_ID;
+					}
+					$SFRbalance = DB::table('adt_user_finance')->leftjoin('adt_user_details', 'adt_user_finance.ufin_user_id','=', 'adt_user_details.UD_USER_ID')->where('adt_user_finance.ufin_user_id_pk_fk','=',$parentid)->get();
+					$FRtotalregamount = Commonmodel::fetchRechargedetails($parent_name);
+					
+					$sfrbal=0;
+					if($SFRbalance)
+					{
+						foreach($SFRbalance as $frs)
+						{
+							$sfrbal = $sfrbal + $frs->ufin_main_balance;
+						}
+						$output = array(
+							'Franchise_Balance' => $sfrbal ,
+							'icash_Balance' => $icashBalance,
+							'Total_recharge_amount' => $FRtotalregamount,
+						);
+					}
+					else
+					{
+						$output = array(
+								'status' => 'failure',
+								'message' => 'No results found',
+						);
+					}
 			}
 			else
 			{
